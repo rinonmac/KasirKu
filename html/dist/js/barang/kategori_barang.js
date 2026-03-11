@@ -197,6 +197,7 @@ async function sse_handler(e) {
             }
             case "UPDATE_KATEGORI": {
                 const data = await fetch_kategori_id(e.data.id);
+                
                 global.element.kategori_barang_table.row("#" + e.data.id).data([
                     data.nama_kategori,
                     `<center>

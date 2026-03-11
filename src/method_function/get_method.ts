@@ -100,7 +100,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD))) return new Response("0", {status: 403});
 
-                stmt = db.prepare("SELECT nama_barang FROM barang WHERE stok_barang >= 0");
+                stmt = db.prepare("SELECT nama_barang FROM barang WHERE stok_barang <= 0");
                 const res = stmt.all();
                 stmt.finalize();
 

@@ -1,5 +1,5 @@
-global.current_items = new Set();
-global.current_total = {
+if (!global.current_items) global.current_items = new Set();
+if (!global.current_total) global.current_total = {
     barang: 0,
     harga_barang: 0n
 }
@@ -29,8 +29,12 @@ global.element = {
                 data: 1,
                 render: $.fn.dataTable.render.text()
             },
-            {data: 2}
-        ]
+            {
+                data: 2,
+                render: $.fn.dataTable.render.text()
+            },
+            {data: 3}
+        ],
     }),
     kasir_table: $("#kasir_table").DataTable({
         columns: [
@@ -51,8 +55,6 @@ global.element = {
     }),
 }
 
-global.add_sse_handler(sse_handler);
-
 global.deinit = function() { 
     global.element.tunai_input.removeEventListener("input", tunai_input_event);
     global.element.jumlah_barang.removeEventListener("input", jumlah_barang_input);
@@ -60,10 +62,6 @@ global.deinit = function() {
 
 global.element.tunai_input.addEventListener("input", tunai_input_event);
 global.element.jumlah_barang.addEventListener("input", jumlah_barang_input);
-
-function sse_handler(e) {
-
-}
 
 function tunai_input_event(e) {
     const res = BigInt(e.target.value.replaceAll(".", "").replaceAll(",", "")) - global.current_total.harga_barang;
@@ -135,6 +133,27 @@ async function masuk_ke_pembukuan() {
             }
         }
     }
+}
+
+async function history_kasir() {
+    if (!global.current_items.size) return;
+
+    global.current_items.forEach(data => {
+        global.element.kasir_table.row.add([
+            data.nama_barang,
+            1,
+            "Rp" + money_format_bigint(BigInt(data.harga_jual)),
+            `<center>
+            <button type="button" class="text-right btn btn-info" onclick="edit_barang_modal(${data.id})">Edit</button>
+            <button type="button" class="text-right btn btn-danger" onclick="hapus_barang(${data.id})">Hapus</button>
+            </center>`
+        ]);
+    })
+    
+    global.element.total_barang.innerText = `Total Barang: ${format_thousand_separator.format(global.current_total.barang)}`;
+    global.element.total_harga_barang.innerText = `Total Harga Barang: Rp${money_format_bigint(global.current_total.harga_barang)}`;
+    
+    global.element.kasir_table.draw();
 }
 
 async function tambah_barang(id, data) {
@@ -376,5 +395,5 @@ async function cari_barang() {
 }
 
 (async function() {
-    global.element.kasir_table.clear().draw()
+    history_kasir();
 })();

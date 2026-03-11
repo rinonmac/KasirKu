@@ -79,6 +79,7 @@ async function sse_handler(e) {
             }
             case "UPDATE_BARANG": {
                 const data = await fetch_barang_id(e.data.id);
+
                 global.element.daftar_barang_table.row("#" + e.data.id).data([
                     data.nama_barang,
                     format_thousand_separator.format(data.stok_barang),
@@ -383,7 +384,6 @@ async function fetch_daftar_barang() {
 }
 
 async function edit_daftar_barang(id) {
-    global.element.daftar_barang_table.clear();
     let res = await fetch("/barang", {
         method: "PATCH",
         headers: {
@@ -421,8 +421,6 @@ async function edit_daftar_barang(id) {
             }
         }
     }
-
-    global.element.daftar_barang_table.draw();
 }
 
 (async function() {
