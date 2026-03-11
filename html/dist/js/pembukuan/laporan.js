@@ -60,7 +60,6 @@ global.deinit = () => {
 global.add_sse_handler(sse_handler);
 
 async function sse_handler(e) {
-    console.log(e.type);
     if (e.type === 4 || e.type === 5) {
         const tanggal_start = Number(global.element.tanggal_laporan_start.value.replaceAll("/", ""));
         const tanggal_end = Number(global.element.tanggal_laporan_end.value.replaceAll("/", ""));
@@ -117,7 +116,7 @@ async function fetch_laporan() {
                 global.total.set(data.tanggal_key, t);
             }
 
-            t.penjualan += ao_to_bigint(data.total_harga);
+            t.penjualan += BigInt(data.total_harga_jual);
             t.barang += data.total_barang;
         });
         
@@ -135,7 +134,7 @@ async function fetch_laporan() {
                 global.total.set(data.tanggal_key, t);
             }
 
-            t.pengeluaran += ao_to_bigint(data.jumlah_uang);
+            t.pengeluaran += BigInt(data.jumlah_uang);
         });
 
         const res_total = {

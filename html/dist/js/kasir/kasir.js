@@ -169,12 +169,12 @@ async function tambah_barang(id, data) {
     global.current_items.forEach(e => {
         if (e.id === data.id) {
             e.jumlah_barang++;
-            e.harga_barang += ao_to_bigint(data.harga_jual);
+            e.harga_barang += BigInt(data.harga_jual);
             global.element.kasir_table.cell(idx, 1).data(format_thousand_separator.format(e.jumlah_barang));
             global.element.kasir_table.cell(idx, 2).data("Rp" + money_format_bigint(e.harga_barang));
             
             global.current_total.barang++;
-            global.current_total.harga_barang += ao_to_bigint(data.harga_jual);
+            global.current_total.harga_barang += BigInt(data.harga_jual);
 
             global.element.total_barang.innerText = `Total Barang: ${format_thousand_separator.format(global.current_total.barang)}`;
             global.element.total_harga_barang.innerText = `Total Harga Barang: Rp${money_format_bigint(global.current_total.harga_barang)}`;
@@ -190,14 +190,14 @@ async function tambah_barang(id, data) {
         id: data.id,
         nama_barang: data.nama_barang,
         jumlah_barang: 1,
-        harga_barang: ao_to_bigint(data.harga_jual),
-        harga_jual: ao_to_bigint(data.harga_jual)
+        harga_barang: BigInt(data.harga_jual),
+        harga_jual: BigInt(data.harga_jual)
     });
 
     global.element.kasir_table.row.add([
         data.nama_barang,
         1,
-        "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual)),
+        "Rp" + money_format_bigint(BigInt(data.harga_jual)),
         `<center>
         <button type="button" class="text-right btn btn-info" onclick="edit_barang_modal(${data.id})">Edit</button>
         <button type="button" class="text-right btn btn-danger" onclick="hapus_barang(${data.id})">Hapus</button>
@@ -205,7 +205,7 @@ async function tambah_barang(id, data) {
     ]);
 
     global.current_total.barang++;
-    global.current_total.harga_barang += ao_to_bigint(data.harga_jual);
+    global.current_total.harga_barang += BigInt(data.harga_jual);
     
     global.element.total_barang.innerText = `Total Barang: ${format_thousand_separator.format(global.current_total.barang)}`;
     global.element.total_harga_barang.innerText = `Total Harga Barang: Rp${money_format_bigint(global.current_total.harga_barang)}`;
@@ -344,7 +344,7 @@ async function cari_barang() {
                 global.element.cari_barang_table.row.add([
                     data.nama_barang,
                     format_thousand_separator.format(data.stok_barang),
-                    "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual)),
+                    "Rp" + money_format_bigint(BigInt(data.harga_jual)),
                     `<center>
                     <button type="button" class="text-right btn btn-success" onclick="tambah_barang(${data.id})"><i class="fa fa-plus"></i> Tambah Barang</button>
                     </center>`

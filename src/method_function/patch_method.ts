@@ -1,5 +1,5 @@
 import { global } from "../global";
-import { bigint_safe, bigint_to_buffer, check_image_type, get_password_hash_only } from "../utils/utils";
+import { check_image_type, get_password_hash_only } from "../utils/utils";
 
 export async function patch_method(req: Request, url: URL) {
     const token = <string>req.headers.get("token");
@@ -24,8 +24,8 @@ export async function patch_method(req: Request, url: URL) {
             const nama_barang = <string>user_input.get("nama_barang");
             const stok_barang = Number(user_input.get("stok_barang"));
             const kategori_barang_id = Number(user_input.get("kategori_barang_id"));
-            const harga_modal = bigint_safe(user_input.get("harga_modal"));
-            const harga_jual = bigint_safe(user_input.get("harga_jual"));
+            const harga_modal = Number(user_input.get("harga_modal"));
+            const harga_jual = Number(user_input.get("harga_jual"));
             let barcode_barang = <string | null>user_input.get("barcode_barang");
 
             if (isNaN(id) || !id || !nama_barang || !stok_barang || isNaN(stok_barang) || isNaN(kategori_barang_id) || !kategori_barang_id || !harga_modal || !harga_jual) return new Response("Bad Request", {status: 400});
@@ -36,8 +36,8 @@ export async function patch_method(req: Request, url: URL) {
                     nama_barang,
                     stok_barang,
                     kategori_barang_id,
-                    bigint_to_buffer(harga_modal),
-                    bigint_to_buffer(harga_jual),
+                    harga_modal,
+                    harga_jual,
                     barcode_barang,
                     Date.now(),
                     id
@@ -117,7 +117,7 @@ export async function patch_method(req: Request, url: URL) {
             const id = Number(user_input.get("id"));
             const tanggal_key = Number(user_input.get("tanggal_key"));
             const deskripsi = <string>user_input.get("deskripsi");
-            const nominal = bigint_safe(user_input.get("nominal"));
+            const nominal = Number(user_input.get("nominal"));
 
             if (isNaN(id) || isNaN(tanggal_key) || !tanggal_key || !id || !deskripsi || !nominal) return new Response("Bad Request", {status: 400});
 
@@ -125,7 +125,7 @@ export async function patch_method(req: Request, url: URL) {
             try {
                 res = db.run("UPDATE pembukuan SET deskripsi = ?, jumlah_uang = ? WHERE id = ? AND tanggal_key = ? AND tipe = 1", [
                     deskripsi,
-                    bigint_to_buffer(nominal),
+                    nominal,
                     id,
                     tanggal_key
                 ]);

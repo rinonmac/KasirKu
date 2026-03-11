@@ -15,6 +15,13 @@
   <!-- Select2 -->
   <link rel="stylesheet" href="/plugins/select2/css/select2.min.css" init-page-css>
   <link rel="stylesheet" href="/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css" init-page-css>
+  <!-- VanillaJS Date Picker -->
+  <link rel="stylesheet" href="/plugins/vanillajs-datepicker/css/datepicker.min.css" init-page-css>
+  <link rel="stylesheet" href="/plugins/vanillajs-datepicker/css/datepicker-bs4.min.css" init-page-css>
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css" init-page-css>
+  <link rel="stylesheet" href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css" init-page-css>
+  <link rel="stylesheet" href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css" init-page-css>
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" init-page-css>
   <!-- Sweetalert2 -->
@@ -209,8 +216,115 @@
     <div class="content">
       <div class="container-fluid">
         <div class="row">
+          <div class="col-md-6">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-info"></i> Informasi Total Hari Ini</h3>
+              </div>
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
+                  <p class="d-flex flex-column">
+                    <span class="text-muted">Barang Terjual</span>
+                    <span class="font-weight-bold" id="barang_terjual">0</span>
+                  </p>
+                  <p class="text-warning text-xl">
+                    <i class="fas fa-regular fa-box"></i>
+                  </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
+                  <p class="d-flex flex-column">
+                    <span class="text-muted">Total Harga Jual</span>
+                    <span class="font-weight-bold" id="total_harga_jual">Rp0</span>
+                  </p>
+                  <p class="text-success text-xl">
+                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-box"></i>
+                  </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
+                  <p class="d-flex flex-column">
+                    <span class="text-muted">Total Pengeluaran</span>
+                    <span class="font-weight-bold" id="total_pengeluaran">Rp0</span>
+                  </p>
+                  <p class="text-danger text-xl">
+                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-minus"></i>
+                  </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center border-bottom mb-3">
+                  <p class="d-flex flex-column">
+                    <span class="text-muted">Total Keuntungan</span>
+                    <span class="font-weight-bold" id="total_keuntungan">Rp0</span>
+                  </p>
+                  <p class="text-success text-xl">
+                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-plus"></i>
+                  </p>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <p class="d-flex flex-column">
+                    <span class="text-muted">Total Pendapatan</span>
+                    <span class="font-weight-bold" id="total_pendapatan">Rp0</span>
+                  </p>
+                  <p class="text-success text-xl">
+                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-plus-minus"></i>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-box-open"></i> Barang Kosong</h3>
+              </div>
+              <div class="card-body">
+                <table id="barang_kosong_table" class="table table-bordered table-hover display nowrap" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>Nama Barang</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-boxes"></i> Barang Total Terjual</h3>
+              </div>
+              <div class="card-body">
+                <label>Tanggal Barang Total Terjual</label>
+                <div class="row">
+                  <div class="col-6 input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="far fa-calendar-alt"></i>
+                      </span>
+                    </div>
+                    <input type="text" class="form-control float-right" id="t_barang_total_terjual_start" onkeydown="return false">
+                  </div>
+                  <div class="col-6 input-group">
+                    <input type="text" class="form-control float-right" id="t_barang_total_terjual_end" onkeydown="return false">
+                  </div>
+                </div>
+                <hr>
+                <table id="barang_total_terjual_table" class="table table-bordered table-hover display nowrap" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>Nama Barang</th>
+                      <th>Jumlah Terjual</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
-        <!-- /.row -->
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content -->
@@ -238,16 +352,31 @@
 <!-- AdminLTE App -->
 <script src="/dist/js/adminlte.min.js"></script>
 
+<!-- DataTables & Plugins -->
+<script src="/plugins/datatables/jquery.dataTables.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-buttons/js/dataTables.buttons.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-buttons/js/buttons.bootstrap4.min.js" data-init-page-script></script>
+<script src="/plugins/pdfmake/pdfmake.min.js" data-init-page-script></script>
+<script src="/plugins/pdfmake/vfs_fonts.js" data-init-page-script></script>
+<script src="/plugins/datatables-buttons/js/buttons.print.min.js" data-init-page-script></script>
+<script src="/plugins/datatables-buttons/js/buttons.colVis.min.js" data-init-page-script></script>
+<!-- VanillaJS Date Picker -->
+<script src="/plugins/vanillajs-datepicker/js/datepicker-full.min.js" data-init-page-script></script>
 <!-- Bootstrap 4 -->
 <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js" data-init-page-script></script>
 <!-- Sweetalert2 -->
 <script src="/plugins/sweetalert2/sweetalert2.all.min.js" data-init-page-script></script>
-
 
 <!-- Init -->
 <script src="/dist/js/init.js"></script>
 
 <!-- Login & Logout -->
 <script src="/dist/js/login.js"></script>
+
+<!-- Dashboard -->
+<script src="/dist/js/dashboard.js" data-page-script></script>
 </body>
 </html>

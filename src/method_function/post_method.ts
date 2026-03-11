@@ -1,6 +1,6 @@
 import { global } from "../global";
 import * as Bun from "bun";
-import { bigint_safe, bigint_to_buffer, bigint_to_uint8array, buffer_to_bigint, get_password_hash_only } from "../utils/utils";
+import { get_password_hash_only } from "../utils/utils";
 
 // server-side
 export async function post_method(req: Request, url: URL) {
@@ -52,8 +52,8 @@ export async function post_method(req: Request, url: URL) {
             const nama_barang = <string>user_input.get("nama_barang");
             const stok_barang = Number(user_input.get("stok_barang"));
             const kategori_barang_id = Number(user_input.get("kategori_barang_id"));
-            const harga_modal = bigint_safe(user_input.get("harga_modal"));
-            const harga_jual = bigint_safe(user_input.get("harga_jual"));
+            const harga_modal = Number(user_input.get("harga_modal"));
+            const harga_jual = Number(user_input.get("harga_jual"));
             let barcode_barang = <string | null>user_input.get("barcode_barang");
             
             if (!nama_barang || isNaN(kategori_barang_id) || !stok_barang || isNaN(stok_barang) || !kategori_barang_id || !harga_modal || !harga_jual) return new Response("Bad Request", {status: 400});
@@ -66,8 +66,8 @@ export async function post_method(req: Request, url: URL) {
                     nama_barang,
                     stok_barang,
                     kategori_barang_id,
-                    bigint_to_buffer(harga_modal),
-                    bigint_to_buffer(harga_jual),
+                    harga_modal,
+                    harga_jual,
                     barcode_barang,
                     now,
                     now
@@ -149,10 +149,10 @@ export async function post_method(req: Request, url: URL) {
             const user_data = await req.json();
             const items = user_data.items as [{
                 id: number,
-                nama_barang: string,
                 jumlah_barang: number,
-                harga_barang: string,
-                harga_jual: string
+                harga_modal: number,
+                harga_jual: number,
+                nama_barang: string
             }];
 
             if (!Array.isArray(items)) return new Response("Bad Request", {status: 400});
@@ -160,31 +160,40 @@ export async function post_method(req: Request, url: URL) {
             const date_now = global.date.getFullYear() * 10000 + (global.date.getMonth() + 1) * 100 + global.date.getDate();
 
             let total_barang = 0;
-            let total_harga = 0n;
+            let total_harga_modal = 0;
+            let total_harga_jual = 0;
+            
+            stmt = db.prepare("SELECT nama_barang, harga_modal, harga_jual FROM barang WHERE id = ?");
 
             items.forEach(data => {
                 total_barang += data.jumlah_barang;
-                const to_bigint = bigint_safe(data.harga_barang);
-                if (!to_bigint) return new Response("Bad Request", {status: 400});
-                total_harga += to_bigint;
+                
+                const barang = stmt.get(data.id) as { nama_barang: string, harga_modal: number, harga_jual: number };
+
+                data.harga_modal = barang.harga_modal;
+                data.harga_jual = barang.harga_jual;
+                data.nama_barang = barang.nama_barang;
+                
+                total_harga_modal += data.harga_modal * data.jumlah_barang;
+                total_harga_jual += data.harga_jual * data.jumlah_barang;
             });
 
             let last_row: any = null;
             try {
                 db.transaction(() => {
-                    stmt = db.prepare("INSERT INTO penjualan (total_barang, total_harga, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?)");
-                    last_row = stmt.run(total_barang, bigint_to_buffer(total_harga), date_now, now, now).lastInsertRowid;
+                    stmt = db.prepare("INSERT INTO penjualan (total_barang, total_harga_modal, total_harga_jual, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?, ?)");
+                    last_row = stmt.run(total_barang, total_harga_modal, total_harga_jual, date_now, now, now).lastInsertRowid;
                     stmt.finalize();
 
                     stmt = db.prepare("INSERT INTO pembukuan (tipe, jumlah_uang, referensi_id, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?, ?)");
-                    stmt.run(0, bigint_to_buffer(total_harga), last_row, date_now, now, now);
+                    stmt.run(0, total_harga_jual, last_row, date_now, now, now);
                     stmt.finalize();
                     
-                    stmt = db.prepare("INSERT INTO penjualan_item (penjualan_id, barang_id, jumlah, harga_barang, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    stmt = db.prepare("INSERT INTO penjualan_item (penjualan_id, barang_id, nama_barang, jumlah, harga_modal, harga_jual, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     const stmt2 = db.prepare("UPDATE barang SET stok_barang = CASE WHEN stok_barang - ? < 0 THEN 0 ELSE stok_barang - ? END WHERE id = ?");
-
+ 
                     items.forEach(e => {
-                        stmt.run(last_row, e.id, e.jumlah_barang, bigint_to_buffer(bigint_safe(e.harga_barang)), date_now, now, now);
+                        stmt.run(last_row, e.id, e.nama_barang, e.jumlah_barang, e.harga_modal * e.jumlah_barang, e.harga_jual * e.jumlah_barang, date_now, now, now);
                         stmt2.run(e.jumlah_barang, e.jumlah_barang, e.id);
                     });
 
@@ -222,7 +231,7 @@ export async function post_method(req: Request, url: URL) {
             const user_input = new URLSearchParams(await req.text());
 
             const deskripsi = <string>user_input.get("deskripsi");
-            const nominal = bigint_safe(user_input.get("nominal"));
+            const nominal = Number(user_input.get("nominal"));
 
             if (!deskripsi || !nominal) return new Response("Bad Reuqest", {status: 400});
 
@@ -234,7 +243,7 @@ export async function post_method(req: Request, url: URL) {
                 last_row = db.run("INSERT INTO pembukuan (tipe, deskripsi, jumlah_uang, tanggal_key, created_ms, modified_ms) VALUES (?, ?, ?, ?, ?, ?)", [
                     1,
                     deskripsi,
-                    bigint_to_buffer(nominal),
+                    nominal,
                     date_now,
                     now,
                     now

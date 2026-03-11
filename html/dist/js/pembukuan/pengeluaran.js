@@ -53,7 +53,7 @@ async function sse_handler(e) {
                     global.element.pengeluaran_table.row.add([
                         global.element.date.toTimeString().slice(0,8),
                         data.deskripsi,
-                        "Rp" + money_format_bigint(ao_to_bigint(data.jumlah_uang)),
+                        "Rp" + money_format_bigint(BigInt(data.jumlah_uang)),
                         `<center>
                         <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
                         <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
@@ -71,7 +71,7 @@ async function sse_handler(e) {
                     global.element.pengeluaran_table.row("#" + e.data.id).data([
                         global.element.date.toTimeString().slice(0,8),
                         data.deskripsi,
-                        "Rp" + money_format_bigint(ao_to_bigint(data.jumlah_uang)),
+                        "Rp" + money_format_bigint(BigInt(data.jumlah_uang)),
                         `<center>
                         <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
                         <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
@@ -108,7 +108,7 @@ global.element.pengeluaran_table.on('click.action_edit', '.action_edit', async f
         const res_json = await res.json();
 
         global.element.deskripsi.value = res_json.deskripsi;
-        global.element.nominal.value = money_format_bigint(ao_to_bigint(res_json.jumlah_uang));
+        global.element.nominal.value = money_format_bigint(BigInt(res_json.jumlah_uang));
 
         global.element.modal_pengeluaran.innerText = "Edit Pengeluaran";
         global.element.modal_pengeluaran_button.innerText = "Edit Pengeluaran";
@@ -255,7 +255,7 @@ async function fetch_pengeluaran() {
             global.element.pengeluaran_table.row.add([
                 global.element.date.toTimeString().slice(0,8),
                 data.deskripsi,
-                "Rp" + money_format_bigint(ao_to_bigint(data.jumlah_uang)),
+                "Rp" + money_format_bigint(BigInt(data.jumlah_uang)),
                 `<center>
                 <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
                 <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>

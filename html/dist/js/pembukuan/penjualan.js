@@ -65,7 +65,6 @@ $('#penjualan_table tbody').on('click', 'td.dt-control', async function () {
         }
 
         const res_json = await res.json();
-        console.log(res_json)
         row.child(format(res_json)).show();
         tr.addClass('shown');
     }
@@ -84,7 +83,7 @@ async function sse_handler(e) {
                         id: data.id,
                         jam: global.element.date.toTimeString().slice(0,8),
                         total_barang: data.total_barang,
-                        total_harga: "Rp" + money_format_bigint(ao_to_bigint(data.total_harga))
+                        total_harga: "Rp" + money_format_bigint(BigInt(data.total_harga_jual))
                     });
                     global.element.penjualan_table.draw();
                 }
@@ -103,7 +102,7 @@ function format(data) {
         <tr>
             <td>${item.nama_barang}</td>
             <td>${format_thousand_separator.format(item.jumlah)}</td>
-            <td>Rp${money_format_bigint(ao_to_bigint(item.harga_barang))}</td>
+            <td>Rp${money_format_bigint(BigInt(item.harga_jual))}</td>
         </tr>
     `).join("");
 
@@ -163,7 +162,7 @@ async function fetch_penjualan() {
                 id: data.id,
                 jam: global.element.date.toTimeString().slice(0,8),
                 total_barang: data.total_barang,
-                total_harga: "Rp" + money_format_bigint(ao_to_bigint(data.total_harga))
+                total_harga: "Rp" + money_format_bigint(BigInt(data.total_harga_jual))
             })
         })
     }

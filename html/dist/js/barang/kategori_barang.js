@@ -54,7 +54,7 @@ global.element.kategori_barang_table.on('click.button_edit', '.action_edit', asy
             global.element.barang_assigned_kategori.row.add([
                 data.nama_barang,
                 format_thousand_separator.format(data.stok_barang),
-                "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual))
+                "Rp" + money_format_bigint(BigInt(data.harga_jual))
             ])
         }
     }

@@ -33,8 +33,9 @@ export const global = {
     // Permissions
     permissions: {
         ADMINISTRATOR: 1 << 0,
-        MANAGE_BARANG: 1 << 1, // done
-        KASIR: 1 << 2, // done
-        MANAGE_PEMBUKUAN: 1 << 3 // belum kelar
+        MANAGE_BARANG: 1 << 1,
+        KASIR: 1 << 2,
+        MANAGE_PEMBUKUAN: 1 << 3,
+        DASHBOARD: 1 << 4
     }
 }

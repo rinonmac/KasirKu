@@ -110,8 +110,8 @@ async function prepare() {
                 nama_barang TEXT,
                 stok_barang INTEGER,
                 kategori_barang_id INTEGER,
-                harga_modal BLOB,
-                harga_jual BLOB,
+                harga_modal INTEGER,
+                harga_jual INTEGER,
                 barcode_barang TEXT UNIQUE DEFAULT NULL,
                 created_ms INTEGER,
                 modified_ms INTEGER,
@@ -124,7 +124,8 @@ async function prepare() {
             `CREATE TABLE IF NOT EXISTS penjualan (
                 id INTEGER PRIMARY KEY,
                 total_barang INT,
-                total_harga BLOB, -- gw bikin BLOB karena BIGINT
+                total_harga_modal INTEGER,
+                total_harga_jual INTEGER,
                 tanggal_key INTEGER,
                 created_ms INTEGER, -- gw bikin INTEGER karena gw udah pake Date.now() pas insert
                 modified_ms INTEGER -- gw bikin INTEGER karena gw udah pake Date.now() pas insert
@@ -137,8 +138,10 @@ async function prepare() {
                 id INTEGER PRIMARY KEY,
                 penjualan_id INTEGER NOT NULL,
                 barang_id INTEGER NOT NULL,
+                nama_barang TEXT,
                 jumlah INTEGER,
-                harga_barang BLOB, -- gw bikin BLOB karena BIGINT
+                harga_modal INTEGER,
+                harga_jual INTEGER,
                 tanggal_key INTEGER,
                 created_ms INTEGER, -- gw bikin INTEGER karena gw udah pake Date.now() pas insert
                 modified_ms INTEGER, -- gw bikin INTEGER karena gw udah pake Date.now() pas insert
@@ -152,7 +155,7 @@ async function prepare() {
                 id INTEGER PRIMARY KEY,
                 tipe INTEGER CHECK(tipe IN (0,1)), -- 0 = pembukuan, 1 = pengeluaran
                 deskripsi TEXT DEFAULT NULL,
-                jumlah_uang BLOB, -- gw bikin BLOB karena BIGINT
+                jumlah_uang INTEGER,
                 referensi_id INTEGER,
                 tanggal_key INTEGER,
                 created_ms INTEGER, -- gw bikin INTEGER karena gw udah pake Date.now() pas insert

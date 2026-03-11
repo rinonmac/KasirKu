@@ -66,7 +66,7 @@ async function sse_handler(e) {
                     data.nama_barang,
                     format_thousand_separator.format(data.stok_barang),
                     data.nama_kategori,
-                    "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual)),
+                    "Rp" + money_format_bigint(BigInt(data.harga_jual)),
                     data.barcode_barang ?? "Tidak Ada",
                     `<center>
                     <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
@@ -83,7 +83,7 @@ async function sse_handler(e) {
                     data.nama_barang,
                     format_thousand_separator.format(data.stok_barang),
                     data.nama_kategori,
-                    "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual)),
+                    "Rp" + money_format_bigint(BigInt(data.harga_jual)),
                     data.barcode_barang ?? "Tidak Ada",
                     `<center>
                     <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
@@ -122,8 +122,8 @@ global.element.daftar_barang_table.on('click.action_edit', '.action_edit', async
         global.element.nama_barang.value = res_json.nama_barang;
         global.element.kategori_barang.val(res_json.kategori_barang_id);
         global.element.stok_barang.value = format_thousand_separator.format(res_json.stok_barang);
-        global.element.harga_modal.value = money_format_bigint(ao_to_bigint(res_json.harga_modal));
-        global.element.harga_jual.value = money_format_bigint(ao_to_bigint(res_json.harga_jual));
+        global.element.harga_modal.value = money_format_bigint(BigInt(res_json.harga_modal));
+        global.element.harga_jual.value = money_format_bigint(BigInt(res_json.harga_jual));
         global.element.persen_jual.value = (((Number((global.element.harga_jual.value).replaceAll(".", "").replaceAll(",", "")) - Number(global.element.harga_modal.value.replaceAll(".", "").replaceAll(",", ""))) / Number(global.element.harga_modal.value.replaceAll(".", "").replaceAll(",", ""))) * 100).toFixed(2);
         global.element.barcode_barang.value = res_json.barcode_barang ?? "";
 
@@ -368,7 +368,7 @@ async function fetch_daftar_barang() {
                 data.nama_barang,
                 format_thousand_separator.format(data.stok_barang),
                 data.nama_kategori,
-                "Rp" + money_format_bigint(ao_to_bigint(data.harga_jual)),
+                "Rp" + money_format_bigint(BigInt(data.harga_jual)),
                 data.barcode_barang ?? "Tidak Ada",
                 `<center>
                 <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>

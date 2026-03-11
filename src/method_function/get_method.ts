@@ -5,6 +5,7 @@ import { user_session_interface } from "../user_session/user_session";
 const protected_routes: Record<string, number> = {
     "/rp.html": global.permissions.ADMINISTRATOR,
     "/users.html": global.permissions.ADMINISTRATOR,
+    "/index.html": global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD,
     "/barang/daftar_barang.html": global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG,
     "/barang/kategori_barang.html": global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG,
     "/kasir/kasir.html": global.permissions.ADMINISTRATOR | global.permissions.KASIR,
@@ -61,6 +62,70 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
         if (!token || !user_info) return new Response("Unauthorized", {status: 401});
 
         switch(api_path) {
+            case "info_total": {
+                const db = global.database;
+                if (!db) return new Response("Internal Server Error", {status: 500});
+                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
+                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
+                stmt.finalize();
+                if (!res_role) return new Response("Internal Server Error", {status: 500});
+
+                if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD))) return new Response("0", {status: 403});
+
+                const user_input = url.searchParams;
+                const tanggal_key = Number(user_input.get("tanggal_key"));
+
+                if (isNaN(tanggal_key) || !tanggal_key) return new Response("Bad Request", {status: 400});
+
+                stmt = db.prepare(`
+                    SELECT
+                        (SELECT SUM(total_barang) FROM penjualan WHERE tanggal_key = ?) AS total_barang, -- total barang terjuals
+                        (SELECT SUM(total_harga_modal) FROM penjualan WHERE tanggal_key = ?) AS total_harga_modal, -- total harga modal
+                        (SELECT SUM(total_harga_jual) FROM penjualan WHERE tanggal_key = ?) AS total_harga_jual, -- total harga jual
+                        (SELECT SUM(jumlah_uang) FROM pembukuan WHERE tanggal_key = ? AND tipe = 1) AS jumlah_uang -- total pengeluaran
+                `);
+
+                const res = stmt.get(tanggal_key, tanggal_key, tanggal_key, tanggal_key);
+                stmt.finalize();
+
+                return new Response(JSON.stringify(res), {status: 200});
+            }
+            case "barang_kosong": {
+                const db = global.database;
+                if (!db) return new Response("Internal Server Error", {status: 500});
+                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
+                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
+                stmt.finalize();
+                if (!res_role) return new Response("Internal Server Error", {status: 500});
+
+                if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD))) return new Response("0", {status: 403});
+
+                stmt = db.prepare("SELECT nama_barang FROM barang WHERE stok_barang >= 0");
+                const res = stmt.all();
+                stmt.finalize();
+
+                return new Response(JSON.stringify(res), {status: 200});
+            }
+            case "penjualan_item_tanggal": {
+                const db = global.database;
+                if (!db) return new Response("Internal Server Error", {status: 500});
+                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
+                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
+                stmt.finalize();
+                if (!res_role) return new Response("Internal Server Error", {status: 500});
+
+                const user_input = url.searchParams;
+                const tanggal_start = Number(user_input.get("tanggal_start"));
+                const tanggal_end = Number(user_input.get("tanggal_end"));
+
+                if (isNaN(tanggal_start) || isNaN(tanggal_end) || !tanggal_start || !tanggal_end) return new Response("Bad Request", {status: 400});
+
+                stmt = db.prepare("SELECT nama_barang, SUM(jumlah) AS jumlah FROM penjualan_item WHERE tanggal_key BETWEEN ? AND ? GROUP BY nama_barang");
+                const res = stmt.all(tanggal_start, tanggal_end);
+                stmt.finalize();
+
+                return new Response(JSON.stringify(res), {status: 200});
+            }
             case "barang": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
@@ -202,7 +267,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (isNaN(penjualan_id)) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT pi.jumlah, pi.harga_barang, pi.tanggal_key, pi.created_ms, pi.modified_ms, b.nama_barang FROM penjualan_item pi JOIN barang b ON b.id = pi.barang_id WHERE pi.penjualan_id = ?");
+                stmt = db.prepare("SELECT jumlah, harga_jual, tanggal_key, created_ms, modified_ms, nama_barang FROM penjualan_item WHERE penjualan_id = ?");
                 const res = stmt.all(penjualan_id);
                 stmt.finalize();
 
