@@ -196,7 +196,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 const barang = <string>user_input.get("barang"); // nama barang and barcode barang
                 if (!barang) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT * FROM barang WHERE barcode_barang = ? OR nama_barang LIKE '%' || ? || '%'");
+                stmt = db.prepare("SELECT * FROM barang WHERE stok_barang > 0 AND (barcode_barang = ? OR nama_barang LIKE '%' || ? || '%')");
                 const res = stmt.all(barang, barang);
                 stmt.finalize();
 

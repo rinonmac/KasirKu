@@ -163,13 +163,17 @@ export async function post_method(req: Request, url: URL) {
             let total_harga_modal = 0;
             let total_harga_jual = 0;
             
-            stmt = db.prepare("SELECT nama_barang, harga_modal, harga_jual FROM barang WHERE id = ?");
+            stmt = db.prepare("SELECT nama_barang, stok_barang, harga_modal, harga_jual FROM barang WHERE id = ?");
 
             items.forEach(data => {
                 total_barang += data.jumlah_barang;
                 
-                const barang = stmt.get(data.id) as { nama_barang: string, harga_modal: number, harga_jual: number };
-
+                const barang = stmt.get(data.id) as { nama_barang: string, stok_barang: number, harga_modal: number, harga_jual: number };
+                
+                if ((barang.stok_barang - data.jumlah_barang) <= 0) {
+                    stmt.finalize();
+                    return new Response("1", {status: 403});
+                }
                 data.harga_modal = barang.harga_modal;
                 data.harga_jual = barang.harga_jual;
                 data.nama_barang = barang.nama_barang;
@@ -177,6 +181,8 @@ export async function post_method(req: Request, url: URL) {
                 total_harga_modal += data.harga_modal * data.jumlah_barang;
                 total_harga_jual += data.harga_jual * data.jumlah_barang;
             });
+
+            stmt.finalize();
 
             let last_row: any = null;
             try {
