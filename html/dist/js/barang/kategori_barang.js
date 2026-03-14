@@ -13,7 +13,13 @@ global.element = {
             },
             {data: 1}
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "900px"
+            }
+        ],
+        autoWidth: false
     }),
     barang_assigned_kategori: $("#barang_assigned_kategori").DataTable({
         columns: [
@@ -30,13 +36,15 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             }
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "300px"
+            }
+        ],
+        autoWidth: false
     })
 };
-
-global.element.modal_kategori_barang.on("shown.bs.modal", function() {
-    global.element.barang_assigned_kategori.columns.adjust().draw();
-})
 
 global.element.kategori_barang_table.on('click.button_edit', '.action_edit', async function () {
     const data = this.value;

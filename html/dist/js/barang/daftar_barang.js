@@ -18,7 +18,7 @@ global.element = {
         columns: [
             {
                 data: 0,
-                render: $.fn.dataTable.render.text()
+                render: $.fn.dataTable.render.text(),
             },
             {
                 data: 1,
@@ -38,8 +38,13 @@ global.element = {
             },
             {data: 5},
         ],
-        autoWidth: false,
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "300px"
+            }
+        ],
+        autoWidth: false
     })
 };
 
@@ -55,7 +60,6 @@ global.deinit = function() {
     global.element.persen_jual.removeEventListener("input", persen_jual_event);
     global.remove_sse_handler(sse_handler);
 }
-
 
 global.add_sse_handler(sse_handler);
 

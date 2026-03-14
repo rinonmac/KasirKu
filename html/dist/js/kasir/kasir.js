@@ -35,7 +35,13 @@ global.element = {
             },
             {data: 3}
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "300px"
+            }
+        ],
+        autoWidth: false
     }),
     kasir_table: $("#kasir_table").DataTable({
         columns: [
@@ -53,7 +59,13 @@ global.element = {
             },
             {data: 3}
         ],
-        scrollX: true,
+        columnDefs: [
+            {
+                targets: 0,
+                width: "400px"
+            }
+        ],
+        autoWidth: false
     }),
 }
 
@@ -74,10 +86,6 @@ global.init = function() {
 global.element.modal_pembayaran_barang.on('shown.bs.modal', function () {
     global.element.tunai_input.focus();
 });
-
-global.element.modal_cari_barang.on("shown.bs.modal", function() {
-    global.element.cari_barang_table.columns.adjust().draw();
-})
 
 global.element.modal_pembayaran_barang.on('hidden.bs.modal', function () {
     global.element.input_barang.focus();

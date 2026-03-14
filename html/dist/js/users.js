@@ -25,7 +25,6 @@ global.element = {
             { data: 3 },
             { data: 4 }
         ],
-        scrollX: true
     }),
     controller_deinit: new AbortController(),
     temp_date: new Date()

@@ -27,7 +27,25 @@ global.element = {
             },
             {data: 3}
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "50px"
+            },
+            {
+                targets: 1,
+                width: "300px"
+            },
+            {
+                targets: 2,
+                width: "100px"
+            },
+            {
+                targets: 3,
+                width: "150px"
+            },
+        ],
+        autoWidth: false
     }),
     date: new Date()
 }

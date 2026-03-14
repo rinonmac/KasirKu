@@ -17,7 +17,13 @@ global.element = {
             { data: 'total_barang' },
             { data: 'total_harga' }
         ],
-        scrollX: true,
+        columnDefs: [
+            {
+                targets: 0,
+                width: "50px"
+            },
+        ],
+        autoWidth: false,
         order: [[1, 'asc']]
     }),
     date: new Date()
@@ -101,16 +107,18 @@ async function sse_handler(e) {
 function format(data) {
     const res = data.map(item => `
         <tr>
-            <td>${item.nama_barang}</td>
+            <td style="width:400px; white-space:normal; word-break:break-word;">
+                ${item.nama_barang}
+            </td>
             <td>${format_thousand_separator.format(item.jumlah)}</td>
             <td>Rp${money_format_bigint(BigInt(item.harga_jual))}</td>
         </tr>
     `).join("");
 
-    return `<table class="table table-bordered table-hover">
+    return `<table class="table table-bordered table-hover" style="table-layout: fixed;">
         <thead>
             <tr>
-                <th>Nama Barang</th>
+                <th style="width:400px;">Nama Barang</th>
                 <th>Jumlah Barang</th>
                 <th>Harga Barang</th>
             </tr>

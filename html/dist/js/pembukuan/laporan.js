@@ -30,7 +30,6 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             }
         ],
-        scrollX: true
     }),
     pengeluaran_table: $("#pengeluaran_table").DataTable({
         columns: [
@@ -43,7 +42,6 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             }
         ],
-        scrollX: true
     })
 }
 

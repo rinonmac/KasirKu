@@ -22,7 +22,13 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             }
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "300px"
+            }
+        ],
+        autoWidth: false
     }),
     barang_total_terjual_table: $("#barang_total_terjual_table").DataTable({
         columns: [
@@ -35,7 +41,13 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             }
         ],
-        scrollX: true
+        columnDefs: [
+            {
+                targets: 0,
+                width: "700px"
+            }
+        ],
+        autoWidth: false
     }),
 
     date: new Date()

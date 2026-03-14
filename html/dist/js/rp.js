@@ -15,7 +15,6 @@ global.element = {
             { data: 2 },
             { data: 3 }
         ],
-        scrollX: true
     }),
     user_assigned_role_table: $("#user_assigned_role_table").DataTable({
         columns: [
@@ -24,7 +23,6 @@ global.element = {
                 render: $.fn.dataTable.render.text()
             },
         ],
-        scrollX: true
     }),
     temp_date: new Date(),
     abort_controllers: [null, null]
