@@ -238,7 +238,6 @@ async function tambah_barang(id, data) {
             }
             return;
         }
-        global.element.input_barang.focus();
     }
 
     let is_found = 0;
@@ -257,6 +256,7 @@ async function tambah_barang(id, data) {
             global.element.total_harga_barang.innerText = `Total Harga Barang: Rp${money_format_bigint(global.current_total.harga_barang)}`;
             
             is_found = 1;
+            global.element.input_barang.focus();
             return;
         }
         idx++;
@@ -288,6 +288,7 @@ async function tambah_barang(id, data) {
     global.element.total_harga_barang.innerText = `Total Harga Barang: Rp${money_format_bigint(global.current_total.harga_barang)}`;
     
     global.element.kasir_table.draw();
+    global.element.input_barang.focus();
 }
 
 function edit_barang_modal(id) {

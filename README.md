@@ -50,3 +50,4 @@ Buka `https://localhost` di browser. Login default: `admin` / `admin`.
 
 # Credit
 - Icon Cash Register by [Kameleon (icon-icons.com)](https://icon-icons.com/icon/cashier-cash-register/118071)
+- NProgress by [rstacruz](https://github.com/rstacruz/nprogress)
