@@ -22,7 +22,7 @@
 
 Pastikan [Bun](https://bun.sh) sudah terinstall.
 
-```bash
+```
 bun install
 bun run index.ts
 ```

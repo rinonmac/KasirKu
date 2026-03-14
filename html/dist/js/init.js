@@ -2,6 +2,7 @@ const global = {
 
 }
 
+global.browser_loaded = false;
 global.sse_retry_count = 0;
 global.sse_retry_timer = null;
 
@@ -13,6 +14,7 @@ const name_profile2 = document.getElementById("name_profile2");
 const profile_img1 = document.getElementById("profile_img1");
 const profile_img2 = document.getElementById("profile_img2");
 const role_profile1 = document.getElementById("role_profile1");
+const status_server = document.getElementById("status_server");
 
 document.querySelectorAll(".nav-redirect").forEach(link => {
   link.addEventListener("click", async e => {
@@ -40,26 +42,82 @@ global.remove_sse_handler = (fn) => {
 };
 
 global.connect_sse = () => {
-  if (global.sse) global.sse.close();
 
-  const on_message = async(e) => {
+  if (global.sse) {
+    global.sse.close();
+  }
+
+  const sse = new EventSource("/api/sse", {
+    withCredentials: true
+  });
+
+  global.sse = sse;
+
+  sse.onopen = () => {
+    global.sse_retry_count = 0;
+
+    status_server.classList.add("badge-success");
+    status_server.classList.remove("badge-danger");
+    status_server.innerText = "Status: Online";
+  };
+
+  sse.onerror = () => {
+    status_server.innerText = "Status: Offline";
+    status_server.classList.remove("badge-success");
+    status_server.classList.add("badge-danger");
+
+    sse.close();
+
+    const delay = global.sse_retry_count < 10 ? 100 : 1000;
+    global.sse_retry_count++;
+
+    setTimeout(() => {
+      global.connect_sse();
+    }, delay);
+  };
+
+  sse.onmessage = async (e) => {
+
     global.sse_retry_count = 0;
 
     const data = JSON.parse(e.data);
+
     if (data.type === 1) {
       switch (data.code) {
-        case "CHANGE_PROFILE": {
+
+        case "CHANGE_PROFILE":
           await fetch_profile();
           refresh_permission();
           break;
-        }
+
         case "UNAUTHORIZED": {
-          if (global.change_password) global.change_password = false;
-          else {
-            global.sse.close();
-            localStorage.removeItem("token");
-            window.location.href = "/login";
+
+          if (global.change_password) {
+            global.change_password = false;
+            return;
           }
+
+          const username = localStorage.getItem("username");
+          const password = localStorage.getItem("password");
+
+          if (username && password) {
+
+            const res = await fetch("/login", {
+              method: "POST",
+              body: new URLSearchParams({ username, password })
+            });
+
+            if (res.status === 200) {
+              localStorage.setItem("token", await res.text());
+              sse.close();
+              global.connect_sse();
+              return;
+            }
+          }
+
+          sse.close();
+          localStorage.removeItem("token");
+          window.location.href = "/login";
           break;
         }
       }
@@ -72,32 +130,9 @@ global.connect_sse = () => {
         console.error("SSE handler error:", err);
       }
     }
+
   };
-
-  const on_error = e => {
-    global.sse.removeEventListener("message", on_message);
-    global.sse.removeEventListener("error", on_error);
-    global.sse.close();
-
-    let delay;
-
-    if (global.sse_retry_count < 10) delay = 50;
-    else delay = 1000;
-
-    global.sse_retry_count++;
-
-    global.sse_retry_timer = setTimeout(() => {
-      global.connect_sse();
-    }, delay);
-  };
-
-  global.sse = new EventSource("/api/sse", {
-    withCredentials: true
-  });
-
-  global.sse.addEventListener("message", on_message);
-  global.sse.addEventListener("error", on_error);
-}
+};
 
 function cssExists(href) {
   return !!document.querySelector(`link[href="${href}"]`);
@@ -184,7 +219,8 @@ async function loadPageScriptFromElement(scriptEl) {
 
 async function load_page(url, push = false) {
   NProgress.start();
-
+  if (!global.browser_loaded) global.browser_loaded = true;
+  
   try {
     const version = ++load_page_version;
 

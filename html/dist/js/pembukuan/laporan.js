@@ -49,6 +49,9 @@ global.init = () => {
     global.element.tanggal_laporan_start.addEventListener("changeDate", tanggal_laporan_start_event);
     global.element.tanggal_laporan_start_picker.setDate(Date.now());
     global.element.tanggal_laporan_end.addEventListener("changeDate", tanggal_laporan_end_event);
+    if (!global.browser_loaded) {
+        fetch_laporan();
+    }
 }
 
 global.deinit = () => {

@@ -39,6 +39,7 @@ export class sse_server {
 
                 const client = { controller, user };
                 set.add(client);
+                controller.enqueue(this.ping);
 
                 const cleanup = () => {
                     try {

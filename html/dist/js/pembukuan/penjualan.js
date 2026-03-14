@@ -32,6 +32,7 @@ global.element = {
 global.init = () => {
     global.element.tanggal_penjualan.addEventListener("changeDate", fetch_penjualan);
     global.element.tanggal_penjualan_picker.setDate(Date.now());
+    if (!global.browser_loaded) fetch_penjualan();
 }
 
 global.deinit = () => {
@@ -194,5 +195,4 @@ async function fetch_penjualan() {
 
 (async function() {
     global.init();
-    
 })();

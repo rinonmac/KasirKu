@@ -53,6 +53,7 @@ global.element = {
 global.init = () => {
     global.element.tanggal_pengeluaran.addEventListener("changeDate", fetch_pengeluaran);
     global.element.tanggal_pengeluaran_picker.setDate(Date.now());
+    if (!global.browser_loaded) fetch_pengeluaran();
 }
 
 global.deinit = () => {

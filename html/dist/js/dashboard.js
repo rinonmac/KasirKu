@@ -57,6 +57,7 @@ global.init = () => {
     global.element.t_barang_total_terjual_start.addEventListener("changeDate", tanggal_total_terjual_start_event);
     global.element.t_barang_total_terjual_start_picker.setDate(Date.now());
     global.element.t_barang_total_terjual_end.addEventListener("changeDate", tanggal_total_terjual_end_event);
+    if (!global.browser_loaded) fetch_barang_terjual_tanggal();
 }
 
 global.deinit = () => {
