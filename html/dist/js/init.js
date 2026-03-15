@@ -319,7 +319,7 @@ async function load_page(url, push = false) {
       title: "Gagal load page karena kamu tidak terkoneksi dengan server."
     });
   }
-  
+
   NProgress.start();
   
   try {
@@ -427,7 +427,6 @@ async function refresh_permission() {
   const parentSection = activeLink.closest(".section_check");
 
   if (parentSection && parentSection.style.display === "none") {
-
     if (await load_page("/", true) === -1) return;
   }
 }
