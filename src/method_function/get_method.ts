@@ -544,7 +544,8 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
     const etag = last_modified.toString();
 
     if (req.headers.get("if-none-match") === etag) return new Response(null, { status: 304 });
-
+    const is_asset = pathname.startsWith("/plugins/") || pathname.startsWith("/dist/") || pathname === "/favicon.ico";
+    
     return new Response(<BodyInit>buffer, {
         status: 200,
         headers: {
@@ -553,7 +554,9 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             "X-Frame-Options": "DENY",
             "X-Content-Type-Options": "nosniff",
             ETag: etag,
-            "Cache-Control": "no-cache",
+            "Cache-Control": is_asset
+            ? "public, max-age=31536000"
+            : "no-cache"
         },
     });
 }
