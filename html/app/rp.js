@@ -40,10 +40,6 @@ global.deinit = () => {
     })
 }
 
-global.element.modal_role.on("shown.bs.modal", function() {
-    global.element.user_assigned_role_table.columns.adjust().draw();
-})
-
 global.element.roles_table.on('click.button_edit', '.action_edit', async function () {
     if (global.element.abort_controllers[1]) global.element.abort_controllers[1].abort();
 

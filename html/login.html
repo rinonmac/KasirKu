@@ -61,7 +61,7 @@
             </div>
           </div>
           <input type="text" id="username" class="form-control" placeholder="Username"
-            onkeypress="if(event.keyCode === 13){ document.getElementById('password').focus() }" autocomplete="off">
+            onkeypress="if(event.key === 'Enter'){ document.getElementById('password').focus() }" autocomplete="off">
         </div>
         <div class="input-group mb-3">
           <div class="input-group-append">
@@ -70,7 +70,7 @@
             </div>
           </div>
           <input type="password" id="password" class="form-control" placeholder="Password"
-            onkeypress="if(event.keyCode === 13){ login() }" autocomplete="off">
+            onkeypress="if(event.key === 'Enter'){ login() }" autocomplete="off">
           <div class="input-group-append">
             <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
               <i class="fas fa-eye"></i>

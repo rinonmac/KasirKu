@@ -215,7 +215,7 @@ export async function post_method(req: Request, url: URL) {
                 type: 4,
                 code: "TAMBAH_PENJUALAN",
                 data: {
-                    id: last_row,
+                    items,
                     tanggal_key: date_now
                 }
             }));

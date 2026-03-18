@@ -31,7 +31,7 @@
   <link rel="stylesheet" href="/plugins/adminlte-docs/adminlte-docs.css">
   <script src="/app/darkmode_head.js"></script>
 </head>
-<body class="hold-transition sidebar-mini layout-footer-fixed layout-fixed">
+<body class="hold-transition sidebar-mini layout-footer-fixed layout-fixed sidebar-collapse">
 <div class="wrapper">
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand navbar-light">
@@ -261,7 +261,7 @@
                     <div class="input-group-prepend">
                       <span class="input-group-text">Rp</span>
                     </div>
-                    <input type="text" class="form-control money_format_idr" id="tunai_input" placeholder="Tunai" onkeydown="if (event.keyCode === 13) {masuk_ke_pembukuan()}" autocomplete="off">
+                    <input type="text" class="form-control money_format_idr" id="tunai_input" placeholder="Tunai" onkeydown="if (event.key === 'Enter') {masuk_ke_pembukuan()}" autocomplete="off">
                   </div>
                 </div>
                 <hr>

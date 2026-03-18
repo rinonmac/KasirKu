@@ -53,9 +53,29 @@ global.element = {
 global.deinit = () => {
     global.element.tanggal_pengeluaran.removeEventListener("changeDate", fetch_pengeluaran)
     global.remove_sse_handler(sse_handler);
+    document.removeEventListener("keydown", document_keydown);
 }
 
 global.add_sse_handler(sse_handler);
+document.addEventListener("keydown", document_keydown);
+
+function document_keydown(e) {
+    switch(e.key) {
+        case "Enter": {
+            if (global.element.modal_pengeluaran.hasClass("show")) {
+                if (e.target.tagName === 'BUTTON') return;
+                global.element.modal_pengeluaran_button.click();
+            }
+            break;
+        }
+        case "Escape": {
+            if (global.element.modal_pengeluaran.hasClass("show")) {
+                global.element.modal_pengeluaran.modal("hide");
+            }
+            break;
+        }
+    }
+}
 
 async function sse_handler(e) {
     if (e.type === 5) {
@@ -125,7 +145,7 @@ global.element.pengeluaran_table.on('click.action_edit', '.action_edit', async f
         global.element.nominal.value = money_format_bigint(BigInt(res_json.jumlah_uang));
 
         global.element.modal_pengeluaran.innerText = "Edit Pengeluaran";
-        global.element.modal_pengeluaran_button.innerText = "Edit Pengeluaran";
+        global.element.modal_pengeluaran_button.innerText = "Edit Pengeluaran (Enter)";
         global.element.modal_pengeluaran_button.onclick = function() {edit_pengeluaran(data)};
 
         global.element.modal_pengeluaran.modal("show");
@@ -192,7 +212,7 @@ global.element.pengeluaran_table.on('click.action_delete', '.action_delete', asy
 
 function tambah_pengeluaran_modal() {
     global.element.modal_pengeluaran_title.innerText = "Tambah Pengeluaran";
-    global.element.modal_pengeluaran_button.innerText = "Tambah Pengeluaran";
+    global.element.modal_pengeluaran_button.innerText = "Tambah Pengeluaran (Enter)";
     global.element.deskripsi.value = "";
     global.element.nominal.value = "";
 

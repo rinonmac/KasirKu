@@ -70,18 +70,15 @@ global.element = {
 }
 
 global.deinit = function() {
-    global.element.input_barang.removeEventListener("input", input_barang);
     global.element.tunai_input.removeEventListener("input", tunai_input_event);
     global.element.jumlah_barang.removeEventListener("input", jumlah_barang_input);
-    document.removeEventListener("keydown", esc_handler);
+    document.removeEventListener("keydown", document_keydown);
 }
 
-global.init = function() {
-    global.element.input_barang.addEventListener("keydown", input_barang);
-    global.element.tunai_input.addEventListener("input", tunai_input_event);
-    global.element.jumlah_barang.addEventListener("input", jumlah_barang_input);
-    history_kasir();
-}
+document.addEventListener("keydown", document_keydown);
+global.element.tunai_input.addEventListener("input", tunai_input_event);
+global.element.jumlah_barang.addEventListener("input", jumlah_barang_input);
+history_kasir();
 
 global.element.modal_pembayaran_barang.on('shown.bs.modal', function () {
     global.element.tunai_input.focus();
@@ -91,33 +88,40 @@ global.element.modal_pembayaran_barang.on('hidden.bs.modal', function () {
     global.element.input_barang.focus();
 });
 
-global.element.modal_cari_barang.on('shown.bs.modal', function () {
-    document.addEventListener("keydown", esc_handler);
-});
-
-function input_barang(e) {
-    switch(e.keyCode) {
-        case 13: { // Enter
+function document_keydown(e) {
+    switch(e.key) {
+        case "Enter": {
+            if (e.target.tagName === 'BUTTON') return;
+            if (global.element.modal_edit_barang.hasClass("show")) global.element.edit_barang_button.click();
+            else if (global.element.modal_pembayaran_barang.hasClass("show")) masuk_ke_pembukuan();
+            else if (global.element.modal_cari_barang.hasClass("show")) break;
             cari_barang();
             break;
         }
-        case 119: { // F8
+        case "F8": {
             pembayaran_barang_modal();
             break;
         }
-        case 46: { // DEL
+        case "Delete": {
             hapus_semua_barang();
             break;
         }
+        case "Escape": {
+            if (global.element.modal_edit_barang.hasClass("show")) {
+                global.element.modal_edit_barang.modal("hide");
+                global.element.input_barang.focus();
+            }
+            else if (global.element.modal_cari_barang.hasClass("show")) {
+                global.element.modal_cari_barang.modal("hide");
+                global.element.input_barang.focus();
+            }
+            else if (global.element.modal_pembayaran_barang.hasClass("show")) {
+                global.element.modal_pembayaran_barang.modal("hide");
+                global.element.input_barang.focus();
+            }
+            break;
+        }
     }
-}
-
-function esc_handler(e) {
-    if (e.keyCode === 27) {
-        global.element.modal_cari_barang.modal("hide");
-        global.element.input_barang.focus();
-    }
-    document.removeEventListener("keydown", esc_handler);
 }
 
 function tunai_input_event(e) {
@@ -395,7 +399,6 @@ function hapus_semua_barang() {
         });
     }
 
-    document.addEventListener("keydown", esc_handler);
     Swal.fire({
         title: "Hapus Semua Barang",
         text: "Apakah anda yakin untuk menghapus semua barang yang ada di kasir?",
@@ -403,8 +406,8 @@ function hapus_semua_barang() {
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes",
-        cancelButtonText: "No"
+        confirmButtonText: "Yes (Enter)",
+        cancelButtonText: "No (Esc)"
     }).then(res => {
         if (res.isConfirmed) {
             global.current_items.clear();
@@ -488,6 +491,5 @@ async function cari_barang() {
 }
 
 (async function() {
-    global.init();
     global.element.input_barang.focus();
 })();

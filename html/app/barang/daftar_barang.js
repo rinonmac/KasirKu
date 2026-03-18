@@ -48,20 +48,35 @@ global.element = {
     })
 };
 
-global.init = function() {
-    global.element.harga_modal.addEventListener("input", harga_modal_event);
-    global.element.harga_jual.addEventListener("input", harga_jual_event);
-    global.element.persen_jual.addEventListener("input", persen_jual_event);
-}
-
 global.deinit = function() {
     global.element.harga_modal.removeEventListener("input", harga_modal_event);
     global.element.harga_jual.removeEventListener("input", harga_jual_event);
     global.element.persen_jual.removeEventListener("input", persen_jual_event);
     global.remove_sse_handler(sse_handler);
+    document.removeEventListener("keydown", document_keydown);
 }
 
+global.element.modal_daftar_barang.on("shown.bs.modal", function() {
+    global.element.nama_barang.focus();
+})
+
 global.add_sse_handler(sse_handler);
+global.element.harga_modal.addEventListener("input", harga_modal_event);
+global.element.harga_jual.addEventListener("input", harga_jual_event);
+global.element.persen_jual.addEventListener("input", persen_jual_event);
+document.addEventListener("keydown", document_keydown);
+
+function document_keydown(e) {
+    if (e.key === "Enter") {
+        if (e.target.tagName === 'BUTTON') return;
+        if (global.element.modal_daftar_barang.hasClass("show")) {
+            global.element.modal_daftar_barang_button.click();
+        }
+    }
+    else if (e.key === "Escape") {
+        if (global.element.modal_daftar_barang.hasClass("show")) global.element.modal_daftar_barang.modal("hide");
+    }
+}
 
 async function sse_handler(e) {
     if (e.type === 2) {
@@ -111,6 +126,27 @@ async function sse_handler(e) {
             }
         }
     }
+    else if (e.type === 3) {
+        await fetch_kategori_barang();
+        await fetch_daftar_barang();
+        global.element.kategori_barang.select2("close");
+    }
+    else if (e.type === 4) {
+        switch(e.code) {
+            case "TAMBAH_PENJUALAN": {
+                for (const items of e.data.items) {
+                    const current_data = global.element.daftar_barang_table.row("#" + items.id).data();
+                    current_data[1] = Number(current_data[1]) - items.jumlah_barang;
+                    global.element.daftar_barang_table.row("#" + items.id).data(current_data, false);
+                }
+                global.element.daftar_barang_table.draw();
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
 }
 
 global.element.daftar_barang_table.on('click.action_edit', '.action_edit', async function () {
@@ -135,7 +171,7 @@ global.element.daftar_barang_table.on('click.action_edit', '.action_edit', async
         global.element.barcode_barang.value = res_json.barcode_barang ?? "";
 
         global.element.modal_daftar_barang_title.innerText = "Edit Barang";
-        global.element.modal_daftar_barang_button.innerText = "Edit Barang";
+        global.element.modal_daftar_barang_button.innerText = "Edit Barang (Enter)";
         global.element.modal_daftar_barang_button.onclick = function() {edit_daftar_barang(data)};
 
         global.element.modal_daftar_barang.modal("show");
@@ -162,8 +198,8 @@ global.element.daftar_barang_table.on('click.action_delete', '.action_delete', a
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes",
-        cancelButtonText: "No"
+        confirmButtonText: "Yes (Enter)",
+        cancelButtonText: "No (Esc)"
     }).then(async ress => {
         if (ress.isConfirmed) {
             let res = await fetch("/barang", {
@@ -251,18 +287,23 @@ function tambah_barang_modal() {
     global.element.stok_barang.value = "";
 
     global.element.modal_daftar_barang_title.innerText = "Tambah Barang";
-    global.element.modal_daftar_barang_button.innerText = "Tambah Barang";
+    global.element.modal_daftar_barang_button.innerText = "Tambah Barang (Enter)";
     global.element.modal_daftar_barang_button.onclick = tambah_barang;
 
     global.element.modal_daftar_barang.modal("show");
 }
 
 async function tambah_barang() {
+    if (!global.element.nama_barang.value || !global.element.stok_barang.value || !global.element.harga_modal.value || !global.element.harga_jual.value) return swal2_mixin.fire({
+        icon: "error",
+        title: "Mohon lengkapi input yang dibintangi!"
+    });
+    
     let res = await fetch("/barang", {
         method: "POST",
         headers: {
             "token": localStorage.getItem("token")
-        },
+        },  
         body: new URLSearchParams({
             "nama_barang": global.element.nama_barang.value,
             "stok_barang": global.element.stok_barang.value.replaceAll(".", ""),
@@ -430,7 +471,6 @@ async function edit_daftar_barang(id) {
 }
 
 (async function() {
-    global.init();
     await fetch_kategori_barang();
     await fetch_daftar_barang();
 })();

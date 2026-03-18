@@ -2,6 +2,7 @@ global.element = {
     modal_kategori_barang_title: document.getElementById("modal_kategori_barang_title"),
     nama_kategori: document.getElementById("nama_kategori"),
     tambah_kategori_barang_button: document.getElementById("tambah_kategori_barang_button"),
+    barang_assigned_kategori_div: document.getElementById("barang_assigned_kategori_div"),
 
     modal_kategori_barang: $("#modal_kategori_barang"),
     kategori_barang_table: $("#kategori_barang_table").DataTable({
@@ -46,13 +47,17 @@ global.element = {
     })
 };
 
+global.element.modal_kategori_barang.on("shown.bs.modal", function() {
+    global.element.nama_kategori.focus();
+})
+
 global.element.kategori_barang_table.on('click.button_edit', '.action_edit', async function () {
     const data = this.value;
     const row_data = global.element.kategori_barang_table.row($(this).closest('tr')).data();
 
     global.element.barang_assigned_kategori.clear();
     global.element.modal_kategori_barang_title.innerText = "Edit Kategori";
-    global.element.tambah_kategori_barang_button.innerText = "Edit Kategori";
+    global.element.tambah_kategori_barang_button.innerText = "Edit Kategori (Enter)";
 
     let res = await fetch(`/api/bak_list?id=${data}`, {
         method: "GET",
@@ -63,7 +68,7 @@ global.element.kategori_barang_table.on('click.button_edit', '.action_edit', asy
 
     if (res.status === 200) {
         const res_json = await res.json();
-
+        global.element.barang_assigned_kategori_div.style = "";
         for (const data of res_json) {
             global.element.barang_assigned_kategori.row.add([
                 data.nama_barang,
@@ -90,8 +95,8 @@ global.element.kategori_barang_table.on('click.action_delete', '.action_delete',
         showCancelButton: true,
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
-        confirmButtonText: "Ya",
-        cancelButtonText: "Tidak"
+        confirmButtonText: "Ya (Enter)",
+        cancelButtonText: "Tidak (Esc)"
     }).then(async ress => {
         if (ress.isConfirmed) {
             let res = await fetch("/kategori_barang", {
@@ -129,8 +134,8 @@ global.element.kategori_barang_table.on('click.action_delete', '.action_delete',
                             showCancelButton: true,
                             confirmButtonColor: "#d33",
                             cancelButtonColor: "#3085d6",
-                            confirmButtonText: "Ya",
-                            cancelButtonText: "Tidak"
+                            confirmButtonText: "Ya (Enter)",
+                            cancelButtonText: "Tidak (Esc)"
                         }).then(async ress => {
                             if (ress.isConfirmed) {
                                 let res = await fetch("/kategori_barang", {
@@ -188,13 +193,26 @@ global.element.kategori_barang_table.on('click.action_delete', '.action_delete',
 
 global.deinit = function() {
     global.remove_sse_handler(sse_handler);
+    document.removeEventListener("keydown", document_keydown);
 }
 
 global.add_sse_handler(sse_handler);
+document.addEventListener("keydown", document_keydown);
+
+function document_keydown(e) {
+    
+    
+    if (e.key === "Enter") {
+        if (e.target.tagName === 'BUTTON') return;
+        if (global.element.modal_kategori_barang.hasClass("show")) document.getElementById("tambah_kategori_barang_button").click();
+    }
+    else if (e.key === "Escape") {
+        if (global.element.modal_kategori_barang.hasClass("show")) global.element.modal_kategori_barang.modal("hide");
+    }
+}
 
 async function sse_handler(e) {
     if (e.type === 3) {
-        console.log(e);
         switch(e.code) {
             case "TAMBAH_KATEGORI": {
                 const data = await fetch_kategori_id(e.data.id);
@@ -235,9 +253,10 @@ async function sse_handler(e) {
     }
 }
 async function tambah_kategori_barang_modal() {
+    global.element.barang_assigned_kategori_div.style = "display: none;";
     global.element.modal_kategori_barang_title.innerText = "Tambah Kategori";
     global.element.nama_kategori.value = "";
-    global.element.tambah_kategori_barang_button.innerText = "Tambah Kategori";
+    global.element.tambah_kategori_barang_button.innerText = "Tambah Kategori (Enter)";
     global.element.tambah_kategori_barang_button.onclick = tambah_kategori_barang;
 
     global.element.modal_kategori_barang.modal("show");
@@ -295,6 +314,11 @@ async function fetch_kategori() {
 }
 
 async function tambah_kategori_barang() {
+    if (!global.element.nama_kategori.value) return swal2_mixin.fire({
+        icon: "error",
+        title: "Nama Kategori tidak boleh kosong!"
+    });
+    
     let res = await fetch("/kategori_barang", {
         method: "POST",
         headers: {
@@ -336,6 +360,10 @@ async function tambah_kategori_barang() {
 }
 
 async function edit_kategori_barang(id) {
+    if (!global.element.nama_kategori.value) return swal2_mixin.fire({
+        icon: "error",
+        title: "Nama Kategori tidak boleh kosong!"
+    });
     let res = await fetch("/kategori_barang", {
         method: "PATCH",
         headers: {
