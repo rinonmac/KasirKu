@@ -73,6 +73,9 @@ $('#penjualan_table tbody').on('click', 'td.dt-control', async function () {
 });
 
 global.add_sse_handler(sse_handler);
+global.refresh_handler = function() {
+    fetch_penjualan();
+}
 
 async function sse_handler(e) {
     if (e.type === 4) {
@@ -190,5 +193,5 @@ async function fetch_penjualan() {
 (async function() {
     global.element.tanggal_penjualan_picker.setDate(Date.now());
     global.element.tanggal_penjualan.addEventListener("changeDate", fetch_penjualan);
-    fetch_penjualan();
+    global.refresh_handler();
 })();

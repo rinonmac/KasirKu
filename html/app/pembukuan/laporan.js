@@ -51,6 +51,10 @@ global.deinit = () => {
     global.remove_sse_handler(sse_handler);
 }
 
+global.refresh_handler = function() {
+    fetch_laporan();
+}
+
 global.add_sse_handler(sse_handler);
 
 async function sse_handler(e) {
@@ -183,5 +187,5 @@ async function hitung_total() {
     global.element.tanggal_laporan_end_picker.setDate(Date.now());
     global.element.tanggal_laporan_start.addEventListener("changeDate", tanggal_laporan_start_event);
     global.element.tanggal_laporan_end.addEventListener("changeDate", tanggal_laporan_end_event);
-    fetch_laporan();
+    global.refresh_handler();
 })();

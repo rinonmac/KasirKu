@@ -148,14 +148,6 @@ global.connect_sse = () => {
 
   global.sse = sse;
 
-  sse.onopen = () => {
-    global.sse_retry_count = 0;
-
-    status_server.classList.add("badge-success");
-    status_server.classList.remove("badge-danger");
-    status_server.innerText = "Status: Online";
-  };
-
   sse.onerror = () => {
     status_server.innerText = "Status: Offline";
     status_server.classList.remove("badge-success");
@@ -177,6 +169,16 @@ global.connect_sse = () => {
 
     if (data.type === 1) {
       switch (data.code) {
+        case "OK": {
+          global.sse_retry_count = 0;
+
+          status_server.classList.add("badge-success");
+          status_server.classList.remove("badge-danger");
+          status_server.innerText = "Status: Online";
+
+          if (global.refresh_handler) global.refresh_handler();
+          break;
+        }
         case "CHANGE_PROFILE": {
           await fetch_profile();
           refresh_permission();

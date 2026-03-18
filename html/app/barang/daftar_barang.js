@@ -56,6 +56,11 @@ global.deinit = function() {
     document.removeEventListener("keydown", document_keydown);
 }
 
+global.refresh_handler = function() {
+    fetch_kategori_barang();
+    fetch_daftar_barang();
+}
+
 global.element.modal_daftar_barang.on("shown.bs.modal", function() {
     global.element.nama_barang.focus();
 })
@@ -471,6 +476,5 @@ async function edit_daftar_barang(id) {
 }
 
 (async function() {
-    await fetch_kategori_barang();
-    await fetch_daftar_barang();
+    global.refresh_handler();
 })();
