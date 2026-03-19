@@ -155,7 +155,7 @@ global.connect_sse = () => {
 
     sse.close();
 
-    const delay = global.sse_retry_count < 10 ? 100 : 1000;
+    const delay = global.sse_retry_count < 10 ? 100 : 500;
     global.sse_retry_count++;
 
     setTimeout(() => {
