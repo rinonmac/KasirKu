@@ -3,6 +3,7 @@ if (!global.current_total) global.current_total = {
     barang: 0,
     harga_barang: 0n
 }
+
 global.element = {
     input_barang: document.getElementById("input_barang"),
     nama_barang: document.getElementById("nama_barang"),
@@ -88,10 +89,19 @@ global.element.modal_pembayaran_barang.on('hidden.bs.modal', function () {
     global.element.input_barang.focus();
 });
 
+global.element.modal_edit_barang.on("shown.bs.modal", function() {
+    global.element.jumlah_barang.focus();
+})
+
+global.element.modal_edit_barang.on("hidden.bs.modal", function() {
+    global.element.input_barang.focus();
+})
+
 function document_keydown(e) {
     switch(e.key) {
         case "Enter": {
             if (e.target.tagName === 'BUTTON') return;
+
             if (global.element.modal_edit_barang.hasClass("show")) global.element.edit_barang_button.click();
             else if (global.element.modal_pembayaran_barang.hasClass("show")) masuk_ke_pembukuan();
             else if (global.element.modal_cari_barang.hasClass("show")) break;
@@ -369,7 +379,10 @@ function hapus_barang(id) {
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes (Enter)",
-        cancelButtonText: "No (Esc)"
+        cancelButtonText: "No (Esc)",
+        didClose: () => {
+            global.element.input_barang.focus();
+        }
     }).then(res => {
         if (res.isConfirmed) {
             let idx = 0;
@@ -407,7 +420,10 @@ function hapus_semua_barang() {
         confirmButtonColor: "#d33",
         cancelButtonColor: "#3085d6",
         confirmButtonText: "Yes (Enter)",
-        cancelButtonText: "No (Esc)"
+        cancelButtonText: "No (Esc)",
+        didClose: () => {
+            global.element.input_barang.focus();
+        }
     }).then(res => {
         if (res.isConfirmed) {
             global.current_items.clear();
@@ -423,9 +439,8 @@ function hapus_semua_barang() {
                 icon: "success",
                 title: "Semua Barang yang ada di Kasir telah dihapus!"
             })
-
-            global.element.input_barang.focus();
         }
+        global.element.input_barang.focus();
     })
 }
 async function cari_barang() {

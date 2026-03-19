@@ -81,6 +81,7 @@ async function sse_handler(e) {
     if (e.type === 4) {
         switch(e.code) {
             case "TAMBAH_PENJUALAN": {
+                console.log(e.data);
                 const data = await fetch_penjualan_id(e.data.id);
                 if (String(data.tanggal_key) === global.element.tanggal_penjualan.value.replaceAll("/", "")) {
                     global.element.date.setTime(data.created_ms);
