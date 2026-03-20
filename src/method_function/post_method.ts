@@ -128,11 +128,15 @@ export async function post_method(req: Request, url: URL) {
                 type: 3,
                 code: "TAMBAH_KATEGORI",
                 data: {
-                    id: last_row
+                    id: last_row,
+                    nama_kategori
                 }
             }));
 
-            return new Response("", {status: 200});
+            return new Response(JSON.stringify({
+                id: last_row,
+                nama_kategori
+            }), {status: 200});
         }
         case "/masuk_ke_pembukuan": {
             const user_info = global.user_sessions.get(token);

@@ -245,28 +245,25 @@ async function sse_handler(e) {
     else if (e.type === 3) {
         switch(e.code) {
             case "TAMBAH_KATEGORI": {
-                const data = await fetch_kategori_id(e.data.id);
                 global.element.kategori_barang_table.row.add([
-                    data.nama_kategori,
+                    e.data.nama_kategori,
                     `<center>
-                    <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
-                    <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}" ${data.id === 1 ? "disabled" : ""}><i class="fa fa-trash"></i> Hapus</button>
+                    <button type="button" class="text-right btn btn-primary action_edit" value="${e.data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
+                    <button type="button" class="text-right btn btn-danger action_delete" value="${e.data.id}" ${e.data.id === 1 ? "disabled" : ""}><i class="fa fa-trash"></i> Hapus</button>
                     </center>`,
-                    data.id
+                    e.data.id
                 ])
                 global.element.kategori_barang_table.draw();
                 break;
             }
             case "UPDATE_KATEGORI": {
-                const data = await fetch_kategori_id(e.data.id);
-                
                 global.element.kategori_barang_table.row("#" + e.data.id).data([
-                    data.nama_kategori,
+                    e.data.nama_kategori,
                     `<center>
-                    <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
-                    <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}" ${data.id === 1 ? "disabled" : ""}><i class="fa fa-trash"></i> Hapus</button>
+                    <button type="button" class="text-right btn btn-primary action_edit" value="${e.data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
+                    <button type="button" class="text-right btn btn-danger action_delete" value="${e.data.id}" ${e.data.id === 1 ? "disabled" : ""}><i class="fa fa-trash"></i> Hapus</button>
                     </center>`,
-                    data.id
+                    e.data.id
                 ]);
                 global.element.kategori_barang_table.draw();
                 break;

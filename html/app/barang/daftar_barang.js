@@ -10,7 +10,27 @@ global.element = {
 
     kategori_barang: $("#kategori_barang").select2({
         theme: 'bootstrap4',
-        dropdownParent: $('#modal_daftar_barang')
+        dropdownParent: $('#modal_daftar_barang'),
+        tags: true,
+        placeholder: "Pilih kategori",
+        language: {
+            noResults: function () {
+                return '<button class="btn btn-sm btn-primary">+ Tambah Kategori</button>';
+            }
+        },
+        escapeMarkup: function (markup) {
+            return markup;
+        },
+        createTag: function (params) {
+            const term = params.term.trim();
+
+            if (term === "") return;
+            return {
+                id: term,
+                text: "+ Tambah Kategori: " + term,
+                newTag: true
+            }
+        }
     }),
     modal_daftar_barang: $("#modal_daftar_barang"),
     daftar_barang_table: $("#daftar_barang_table").DataTable({
@@ -46,7 +66,9 @@ global.element = {
         ],
         responsive: true,
         autoWidth: false
-    })
+    }),
+
+    is_tambah_kategori: false
 };
 
 global.deinit = function() {
@@ -72,9 +94,63 @@ global.element.harga_jual.addEventListener("input", harga_jual_event);
 global.element.persen_jual.addEventListener("input", persen_jual_event);
 document.addEventListener("keydown", document_keydown);
 
+
+global.element.kategori_barang.on('select2:select', async function (e) {
+  const data = e.params.data
+
+  if (data.newTag) {
+    global.element.is_tambah_kategori = true;
+    global.element.kategori_barang.find(`option[value="${data.id}"]`).remove().trigger("change");
+
+    const res = await fetch("/kategori_barang", {
+        method: "POST",
+        headers: {
+            "token": localStorage.getItem("token")
+        },
+        body: new URLSearchParams({
+            nama_kategori: data.id
+        })
+    })
+
+    if (res.status === 200) {
+        const res_json = await res.json();
+        swal2_mixin.fire({
+            icon: "success",
+            title: "Kategori Barang berhasil dibuat!"
+        });
+
+        global.element.kategori_barang.append(new Option(res_json.nama_kategori, res_json.id, true, true)).trigger("change");
+    }
+    else {
+        global.element.is_tambah_kategori = false;
+        const status = await res.text();
+
+        switch(status) {
+            case "1": {
+                swal2_mixin.fire({
+                    icon: "error",
+                    title: "Gagal membuat kategori barang karena kategori tersebut sudah ada!"
+                });
+                break;
+            }
+            default: {
+                swal2_mixin.fire({
+                    icon: "error",
+                    title: "Kesalahan terjadi! Mohon coba lagi nanti."
+                });
+            }
+            global.element.kategori_barang.val(null).trigger("change");
+        }
+    }
+
+    
+  }
+})
+
 function document_keydown(e) {
     if (e.key === "Enter") {
         if (e.target.tagName === 'BUTTON') return;
+        if ($(e.target).hasClass("select2-search__field")) return;
         if (global.element.modal_daftar_barang.hasClass("show")) {
             global.element.modal_daftar_barang_button.click();
         }
@@ -133,8 +209,22 @@ async function sse_handler(e) {
         }
     }
     else if (e.type === 3) { // kategori barang
-        await fetch_kategori_barang();
-        await fetch_daftar_barang();
+        switch(e.code) {
+            case "TAMBAH_KATEGORI": {
+                if (global.element.is_tambah_kategori) global.element.is_tambah_kategori = false;
+                else global.element.kategori_barang.append(new Option(e.data.nama_kategori, e.data.id, true, true)).trigger('change');
+                break;
+            }
+            case "UPDATE_KATEGORI": {
+                const option = global.element.kategori_barang.find(`option[value="${e.data.id}"]`);
+                option.text(e.data.nama_kategori).trigger("change");
+                break;
+            }
+            case "DELETE_KATEGORI": {
+                global.element.kategori_barang.find(`option[value="${e.data.id}"]`).remove().trigger("change");
+                break;
+            }
+        }
         global.element.kategori_barang.select2("close");
     }
     else if (e.type === 4) { // kasir tambah penjualan

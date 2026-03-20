@@ -95,6 +95,7 @@ export async function patch_method(req: Request, url: URL) {
                 code: "UPDATE_KATEGORI",
                 data: {
                     id,
+                    nama_kategori
                 }
             }));
 
