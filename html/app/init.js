@@ -196,11 +196,10 @@ global.connect_sse = () => {
             return;
           }
 
-          const username = localStorage.getItem("username");
-          const password = localStorage.getItem("password");
+          const username = localStorage.getItem("username") || sessionStorage.getItem("username");
+          const password = localStorage.getItem("password") || sessionStorage.getItem("password");
 
           if (username && password) {
-
             const res = await fetch("/login", {
               method: "POST",
               body: new URLSearchParams({ username, password })

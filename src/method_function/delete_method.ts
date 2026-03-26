@@ -10,9 +10,7 @@ export async function delete_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -23,7 +21,7 @@ export async function delete_method(req: Request, url: URL) {
 
             if (!id || isNaN(id)) return new Response("Bad Request", {status: 400});
 
-            stmt = db.prepare("SELECT kategori_barang_id FROM barang WHERE id = ?");
+            const stmt = db.prepare("SELECT kategori_barang_id FROM barang WHERE id = ?");
             const res = stmt.get(id) as {kategori_barang_id: number};
             stmt.finalize();
 
@@ -55,9 +53,7 @@ export async function delete_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -99,9 +95,7 @@ export async function delete_method(req: Request, url: URL) {
             
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -138,9 +132,7 @@ export async function delete_method(req: Request, url: URL) {
             
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -176,9 +168,7 @@ export async function delete_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});

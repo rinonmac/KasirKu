@@ -28,6 +28,9 @@ async function login() {
             localStorage.setItem("username", username);
             localStorage.setItem("password", password);
         }
+        sessionStorage.setItem("username", username);
+        sessionStorage.setItem("password", password);
+        
         localStorage.setItem("token", await res.text())
         window.location.href = "/"
     }
