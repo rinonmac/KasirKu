@@ -18,11 +18,7 @@ export async function post_method(req: Request, url: URL) {
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
 
-            let stmt = db.prepare("SELECT id, password_hash, role_id FROM users WHERE username = ?");
-            const row = stmt.get(username) as {id: number, password_hash: string, role_id: number};
-
-            stmt.finalize();
-
+            const row = db.query("SELECT id, password_hash, role_id FROM users WHERE username = ?").get(username) as {id: number, password_hash: string, role_id: number};
             if (!row) return new Response("Forbidden", {status: 403});
 
             if (!Bun.password.verifySync(password, global.ph_text + row.password_hash)) return new Response("Forbidden", {status: 403});
@@ -40,9 +36,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -95,9 +89,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -144,9 +136,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.KASIR))) return new Response("0", {status: 403});
@@ -168,7 +158,7 @@ export async function post_method(req: Request, url: URL) {
             let total_harga_modal = 0;
             let total_harga_jual = 0;
             
-            stmt = db.prepare("SELECT nama_barang, stok_barang, harga_modal, harga_jual FROM barang WHERE id = ?");
+            let stmt = db.prepare("SELECT nama_barang, stok_barang, harga_modal, harga_jual FROM barang WHERE id = ?");
 
             for (const data of items) {
                 total_barang += data.jumlah_barang;
@@ -232,9 +222,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -281,9 +269,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -296,7 +282,7 @@ export async function post_method(req: Request, url: URL) {
             
             if (isNaN(barang_id) || !barang_id || !deskripsi || isNaN(jumlah_barang) || !jumlah_barang) return new Response("Bad Request", {status: 400});
 
-            stmt = db.prepare("SELECT id, nama_barang, stok_barang FROM barang WHERE id = ?");
+            const stmt = db.prepare("SELECT id, nama_barang, stok_barang FROM barang WHERE id = ?");
             const res = stmt.get(barang_id) as {id: number, nama_barang: string, stok_barang: number};
             stmt.finalize();
 
@@ -347,9 +333,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -400,9 +384,7 @@ export async function post_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});

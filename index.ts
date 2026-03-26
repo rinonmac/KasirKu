@@ -227,6 +227,36 @@ function database_create_req(db: Database, version: number, current_ms: number) 
 async function prepare() {
     console.log("[LOG] Preparing Server...");
 
+    if (!(await Bun.file("config.json").exists())) {
+        console.log("[LOG] Config file not found! Creating...");
+
+        await Bun.file("config.json").write(JSON.stringify(global.config, null, 4));
+        console.log("[LOG] Config file has been created");
+    } else global.config = await Bun.file("config.json").json();
+
+    if (global.config.compile_html) {
+       try {
+            mkdirSync("html_build");
+        } catch(e) {}
+
+        await scan_html_file("html");
+    }
+
+    switch(global.config.db_type) {
+        case "sqlite": {
+            break;
+        }
+        case "mysql": {
+            break;
+        }
+        case "postgresql": {
+            break;
+        }
+        default: {
+            process.exit(0);
+        }
+    }
+
     // Preapre Profile Image Folder
     if (!(await Bun.file("profile_img/default.svg").exists())) {
         console.log("[LOG] default.svg for default profile not found! Creating...");
@@ -291,7 +321,7 @@ async function prepare() {
         cert.validity.notAfter.setDate(cert.validity.notBefore.getDate() + 36500);
 
         const attrs = [
-            { name: "commonName", value: "kevin.adhaikal" },
+            { name: "commonName", value: "localhost" },
         ];
 
         cert.setSubject(attrs);
@@ -357,22 +387,6 @@ async function prepare() {
     else global.database.run("UPDATE kasirku SET value = ? WHERE key = ?", [
         "1", "version"
     ])
-    
-
-    if (!(await Bun.file("config.json").exists())) {
-        console.log("[LOG] Config file not found! Creating...");
-
-        await Bun.file("config.json").write(JSON.stringify(global.config, null, 4));
-        console.log("[LOG] Config file has been created");
-    } else global.config = await Bun.file("config.json").json();
-
-    if (global.config.compile_html) {
-       try {
-            mkdirSync("html_build");
-        } catch(e) {}
-
-        await scan_html_file("html");
-    }
 
     console.log("[LOG] All ready!");
 }

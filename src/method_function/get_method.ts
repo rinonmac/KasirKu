@@ -65,9 +65,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "info_total": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD))) return new Response("0", {status: 403});
@@ -77,7 +75,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (isNaN(tanggal_key) || !tanggal_key) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare(`
+                const stmt = db.prepare(`
                     SELECT
                         (SELECT SUM(total_barang) FROM penjualan WHERE tanggal_key = ?) AS total_barang, -- total barang terjuals
                         (SELECT SUM(total_harga_modal) FROM penjualan WHERE tanggal_key = ?) AS total_harga_modal, -- total harga modal
@@ -93,14 +91,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "barang_kosong": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.DASHBOARD))) return new Response("0", {status: 403});
 
-                stmt = db.prepare("SELECT nama_barang FROM barang WHERE stok_barang <= 0");
+                const stmt = db.prepare("SELECT nama_barang FROM barang WHERE stok_barang <= 0");
                 const res = stmt.all();
                 stmt.finalize();
 
@@ -109,9 +105,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "penjualan_item_tanggal": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 const user_input = url.searchParams;
@@ -120,7 +114,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (isNaN(tanggal_start) || isNaN(tanggal_end) || !tanggal_start || !tanggal_end) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT nama_barang, SUM(jumlah) AS jumlah FROM penjualan_item WHERE tanggal_key BETWEEN ? AND ? GROUP BY nama_barang");
+                const stmt = db.prepare("SELECT nama_barang, SUM(jumlah) AS jumlah FROM penjualan_item WHERE tanggal_key BETWEEN ? AND ? GROUP BY nama_barang");
                 const res = stmt.all(tanggal_start, tanggal_end);
                 stmt.finalize();
 
@@ -129,9 +123,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "barang": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -142,12 +134,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 
                 let res;
                 if (isNaN(id) || !id) {
-                    stmt = db.prepare("SELECT b.id, b.nama_barang, b.stok_barang, b.kategori_barang_id, b.harga_modal, b.harga_jual, b.barcode_barang, b.created_ms, b.modified_ms, k.nama_kategori AS nama_kategori FROM barang b JOIN kategori_barang k ON b.kategori_barang_id = k.id");
+                    const stmt = db.prepare("SELECT b.id, b.nama_barang, b.stok_barang, b.kategori_barang_id, b.harga_modal, b.harga_jual, b.barcode_barang, b.created_ms, b.modified_ms, k.nama_kategori AS nama_kategori FROM barang b JOIN kategori_barang k ON b.kategori_barang_id = k.id");
                     res = stmt.all();
                     stmt.finalize();
                 }
                 else {
-                    stmt = db.prepare("SELECT b.id, b.nama_barang, b.stok_barang, b.kategori_barang_id, b.harga_modal, b.harga_jual, b.barcode_barang, b.created_ms, b.modified_ms, k.nama_kategori AS nama_kategori FROM barang b JOIN kategori_barang k ON b.kategori_barang_id = k.id WHERE b.id = ?");
+                    const stmt = db.prepare("SELECT b.id, b.nama_barang, b.stok_barang, b.kategori_barang_id, b.harga_modal, b.harga_jual, b.barcode_barang, b.created_ms, b.modified_ms, k.nama_kategori AS nama_kategori FROM barang b JOIN kategori_barang k ON b.kategori_barang_id = k.id WHERE b.id = ?");
                     res = stmt.get(id);
                     stmt.finalize();
                 }
@@ -157,9 +149,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "kategori_barang": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -169,12 +159,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 let res;
                 if (isNaN(id) || !id) {
-                    stmt = db.prepare("SELECT * FROM kategori_barang");
+                    const stmt = db.prepare("SELECT * FROM kategori_barang");
                     res = stmt.all();
                     stmt.finalize();
                 }
                 else {
-                    stmt = db.prepare("SELECT * FROM kategori_barang WHERE id = ?");
+                    const stmt = db.prepare("SELECT * FROM kategori_barang WHERE id = ?");
                     res = stmt.get(id);
                     stmt.finalize();
                 }
@@ -184,9 +174,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "cari_barang": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -197,6 +185,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 const bm = <string>user_input.get("bm"); // apakah cari barang ini untuk barang masuk?
                 if (!barang) return new Response("Bad Request", {status: 400});
 
+                let stmt;
                 if (bm) stmt = db.prepare("SELECT * FROM barang WHERE barcode_barang = ? OR nama_barang LIKE '%' || ? || '%'");
                 else stmt = db.prepare("SELECT * FROM barang WHERE stok_barang > 0 AND (barcode_barang = ? OR nama_barang LIKE '%' || ? || '%')");
                 
@@ -208,9 +197,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "bak_list": { // barang assigned kategori (BAK) list
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -220,7 +207,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 const id = Number(user_input.get("id"));
                 if (isNaN(id) || !id) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT nama_barang, stok_barang, harga_jual FROM barang WHERE kategori_barang_id = ?");
+                const stmt = db.prepare("SELECT nama_barang, stok_barang, harga_jual FROM barang WHERE kategori_barang_id = ?");
                 const res = stmt.all(id);
                 stmt.finalize();
 
@@ -229,9 +216,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "barang_masuk": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -241,7 +226,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 const tanggal_key = Number(user_input.get("tanggal_key"));
                 if (isNaN(tanggal_key) || !tanggal_key) return new Response("Bad Request", {status: 400});
                 
-                stmt = db.prepare("SELECT bm.id, b.nama_barang, bm.deskripsi, bm.jumlah_barang FROM barang_masuk bm JOIN barang b ON b.id = bm.barang_id WHERE bm.tanggal_key = ?");
+                const stmt = db.prepare("SELECT bm.id, b.nama_barang, bm.deskripsi, bm.jumlah_barang FROM barang_masuk bm JOIN barang b ON b.id = bm.barang_id WHERE bm.tanggal_key = ?");
                 const res = stmt.all(tanggal_key);
                 stmt.finalize();
 
@@ -250,9 +235,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "penjualan": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -264,12 +247,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
                 let res;
                 if (isNaN(id) || !id) {
                     if (isNaN(tanggal_key)) return new Response("Bad Request", {status: 400});
-                    stmt = db.prepare("SELECT * FROM penjualan WHERE tanggal_key = ?");
+                    const stmt = db.prepare("SELECT * FROM penjualan WHERE tanggal_key = ?");
                     res = stmt.all(tanggal_key);
                     stmt.finalize();
                 }
                 else {
-                    stmt = db.prepare("SELECT * FROM penjualan WHERE id = ?");
+                    const stmt = db.prepare("SELECT * FROM penjualan WHERE id = ?");
                     res = stmt.get(id);
                     stmt.finalize();
                 }
@@ -279,9 +262,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "penjualan_item": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -291,7 +272,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (isNaN(penjualan_id)) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT jumlah, harga_jual, tanggal_key, created_ms, modified_ms, nama_barang FROM penjualan_item WHERE penjualan_id = ?");
+                const stmt = db.prepare("SELECT jumlah, harga_jual, tanggal_key, created_ms, modified_ms, nama_barang FROM penjualan_item WHERE penjualan_id = ?");
                 const res = stmt.all(penjualan_id);
                 stmt.finalize();
 
@@ -300,9 +281,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "pengeluaran": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -313,13 +292,13 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 let res;
                 if (!isNaN(id) && id) {
-                    stmt = db.prepare("SELECT * FROM pembukuan WHERE id = ? AND tipe = 1");
+                    const stmt = db.prepare("SELECT * FROM pembukuan WHERE id = ? AND tipe = 1");
                     res = stmt.get(id);
                     stmt.finalize();
                 }
                 else {
                     if (isNaN(tanggal_key)) return new Response("Bad Request", {status: 400});
-                    stmt = db.prepare("SELECT * FROM pembukuan WHERE tanggal_key = ? AND tipe = 1");
+                    const stmt = db.prepare("SELECT * FROM pembukuan WHERE tanggal_key = ? AND tipe = 1");
                     res = stmt.all(tanggal_key);
                     stmt.finalize();
                 }
@@ -329,9 +308,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "laporan": {
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -343,7 +320,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (isNaN(tanggal_start) || isNaN(tanggal_end) || !tanggal_start || !tanggal_end) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT * FROM penjualan WHERE tanggal_key BETWEEN ? AND ?");
+                let stmt = db.prepare("SELECT * FROM penjualan WHERE tanggal_key BETWEEN ? AND ?");
                 const penjualan = stmt.all(tanggal_start, tanggal_end);
                 stmt.finalize();
 
@@ -368,9 +345,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "user": { // get user information by id (administrator permission only)
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -380,7 +355,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (!id || isNaN(id)) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT username, full_name, role_id, profile_img, created_ms, modified_ms FROM users WHERE id = ?");
+                const stmt = db.prepare("SELECT username, full_name, role_id, profile_img, created_ms, modified_ms FROM users WHERE id = ?");
                 const res = stmt.get(id);
 
                 stmt.finalize();
@@ -394,14 +369,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "users": { // get list of all users information (administrator permission only)
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
                 
                 if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
 
-                stmt = db.prepare("SELECT id, username, full_name, role_id, profile_img, created_ms, modified_ms FROM users");
+                const stmt = db.prepare("SELECT id, username, full_name, role_id, profile_img, created_ms, modified_ms FROM users");
                 const res = stmt.all();
 
                 stmt.finalize();
@@ -413,14 +386,12 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "roles": { // get list of all roles information (administrator permission only)
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
                     
                 if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
 
-                stmt = db.prepare("SELECT * FROM roles");
+                const stmt = db.prepare("SELECT * FROM roles");
                 const res = stmt.all();
 
                 stmt.finalize();
@@ -432,9 +403,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "role": { // get role information by id (administrator permission only)
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
                     
                 if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -445,7 +414,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (!id || isNaN(id)) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT * FROM roles WHERE id = ?");
+                const stmt = db.prepare("SELECT * FROM roles WHERE id = ?");
                 const res = stmt.get(id);
 
                 stmt.finalize();
@@ -459,9 +428,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
             case "uar_list": { // user assigned role (UAR) list
                 const db = global.database;
                 if (!db) return new Response("Internal Server Error", {status: 500});
-                let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-                const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-                stmt.finalize();
+                const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
                 if (!res_role) return new Response("Internal Server Error", {status: 500});
 
                 if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -472,7 +439,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
                 if (!id || isNaN(id)) return new Response("Bad Request", {status: 400});
 
-                stmt = db.prepare("SELECT username, full_name FROM users WHERE role_id = ?");
+                const stmt = db.prepare("SELECT username, full_name FROM users WHERE role_id = ?");
                 const res = stmt.all(id);
 
                 stmt.finalize();
@@ -527,9 +494,7 @@ export async function get_method(req: Request, url: URL, remote_ip: string) {
 
         const db = global.database;
         if (!db) return new Response("Internal Server Error", {status: 500});
-        let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-        const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-        stmt.finalize();
+        const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
         
         if (required_perm && !(res_role.permission_level & required_perm)) {
             for (const [key, value] of Object.entries(protected_routes)) {

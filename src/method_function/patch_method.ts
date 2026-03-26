@@ -11,9 +11,7 @@ export async function patch_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -64,9 +62,7 @@ export async function patch_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
@@ -107,9 +103,7 @@ export async function patch_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_PEMBUKUAN))) return new Response("0", {status: 403});
@@ -217,9 +211,7 @@ export async function patch_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
             
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403});
@@ -244,7 +236,7 @@ export async function patch_method(req: Request, url: URL) {
             );
             else new_password = null;
             
-            stmt = db.prepare("SELECT role_id FROM users WHERE id = ?");
+            const stmt = db.prepare("SELECT role_id FROM users WHERE id = ?");
             let res = stmt.get(id) as {role_id: number};
             if (!res) return new Response("Not Found", {status: 404});
 
@@ -337,9 +329,7 @@ export async function patch_method(req: Request, url: URL) {
 
             const db = global.database;
             if (!db) return new Response("Internal Server Error", {status: 500});
-            let stmt = db.prepare("SELECT permission_level FROM roles WHERE id = ?");
-            const res_role = stmt.get(user_info.role_id) as {permission_level: number};
-            stmt.finalize();
+            const res_role = db.query("SELECT permission_level FROM roles WHERE id = ?").get(user_info.role_id) as {permission_level: number};
             if (!res_role) return new Response("Internal Server Error", {status: 500});
 
             if (!(res_role.permission_level & global.permissions.ADMINISTRATOR)) return new Response("0", {status: 403}); // you don't have a permission to do that.
