@@ -38,7 +38,7 @@
   Perubahan data dapat langsung tersinkron secara realtime tanpa reload halaman.
 - **Single Page Application (SPA)**  
   Navigasi halaman cepat tanpa reload penuh.
-- **Responsive UI**
+- **Responsive UI**  
   Antarmuka berbasis AdminLTE yang nyaman digunakan di berbagai ukuran layar.
 - **Dark Mode**  
   Mendukung tampilan terang dan gelap.
@@ -48,6 +48,8 @@
   File HTML dan JavaScript di-*minify* serta dikompresi menggunakan Brotli untuk mengurangi ukuran file, menghemat bandwidth, dan meningkatkan kecepatan loading halaman.
 - **Minimal Dependency**  
   Backend ringan menggunakan Bun dan TypeScript dengan dependensi minimal.
+- **Dukungan Multi Database**  
+  Mendukung SQLite, MySQL, dan PostgreSQL.
 - **Docker Support**  
   Dapat dijalankan dengan mudah menggunakan container Docker.
 
