@@ -101,6 +101,26 @@ Akhirnya pada saat saya masih **SMK kelas 2**, saya mulai bikin aplikasi ini.
 
 ---
 
+### Q: Target pengguna KasirKu itu siapa aja?
+
+A: Target pengguna **KasirKu** adalah:
+
+- **Toko kecil / warung**
+- **UMKM (Usaha Mikro, Kecil, dan Menengah)**
+
+Aplikasi ini dibuat supaya bisa membantu pemilik usaha kecil dalam mencatat dan mengelola penjualan dengan cara yang lebih mudah dan simpel.
+
+---
+
+### Q: Kenapa KasirKu dibuat open-source?
+
+A: Saya membuat project ini **open-source** karena beberapa alasan:
+
+- Supaya aplikasi ini bisa **terus berkembang**
+- Supaya **orang lain bisa belajar** dari project ini
+- Supaya orang lain juga bisa **berkontribusi dan membantu mengembangkan project ini**
+- Supaya project ini bisa **berguna bagi lebih banyak orang**
+
 ### Q: Dulu namanya `aplikasikasir`. Kenapa diganti menjadi `KasirKu`?
 
 A: Menurut saya... nama itu terasa seperti hanya deskripsi aplikasi saja, bukan sebuah brand.
@@ -180,10 +200,25 @@ Saya melanjutkan project ini dengan beberapa alasan:
   - Basic security
   - Basic networking (seperti **Realtime SSE**, Query, dll)
 
+---
+
+### Q: Kalo misalnya Anda menggunakan Bun.JS, berarti dependencies / resource nya akan berat dong?
+
+A: Saya tetap usahakan agar aplikasi **KasirKu** ini bisa **ringan dan cepat**.
+
+Walaupun menggunakan **Bun.JS**, saya tetap berusaha untuk:
+- Tidak menggunakan dependencies yang berlebihan
+- Menjaga performa aplikasi supaya tetap cepat
+- Tetap memperhatikan aspek **keamanan**
+
+Jadi walaupun bukan lagi menggunakan bahasa **C**, tujuan saya tetap sama:  
+membuat aplikasi kasir yang **ringan, cepat, dan aman untuk digunakan.**
+
+---
+
 ### Q: Pelajaran apa yang bisa diambil dari project ini?
 
-**A:**  
-Hmmmm... pelajaran yang bisa diambil dari project ini sih...
+A: Hmmmm... pelajaran yang bisa diambil dari project ini sih...
 
 #### Jangan mempersulit diri sendiri & jangan membuat sesuatu yang gampang menjadi sulit
 
