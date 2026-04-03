@@ -93,6 +93,109 @@ docker run -d -p 80:80 -p 443:443 \
 ## Akses
 Buka `https://localhost` di browser. Login default: `admin` / `admin`.
 
+## QnA
+### Q: Kenapa Anda membuat aplikasi ini?
+
+Orang tua saya mempunyai toko, dan dari situ saya kepikiran untuk membuat aplikasi kasir sendiri.  
+Akhirnya pada saat saya masih **SMK kelas 2**, saya mulai bikin aplikasi ini.
+
+---
+
+### Q: Dulu namanya `aplikasikasir`. Kenapa diganti menjadi `KasirKu`?
+
+A: Menurut saya... nama itu terasa seperti hanya deskripsi aplikasi saja, bukan sebuah brand.
+
+Karena itu saya mengganti namanya menjadi **KasirKu**, supaya:
+
+- Lebih mudah diingat
+- Terasa seperti sebuah brand
+- Lebih enak disebut
+
+---
+
+### Q: Dulu project ini menggunakan bahasa C. Kenapa sekarang diganti ke Bun.JS?
+
+A: Karena... jujur saja lumayan susah wkwkwk 😂
+
+Tapi bukan cuma itu aja alasannya.
+
+Beberapa alasan kenapa saya pindah dari **C** ke **Bun.JS**:
+
+- Code C cukup sulit dibaca dan dikembangkan
+- Orang lain jadi lebih sulit berkontribusi ke project
+- Development bisa jadi jauh lebih lama
+
+Kalau project ini tetap menggunakan **C sampai sekarang**, kemungkinan besar perkembangannya akan jauh lebih lambat.
+
+Akhirnya saya memutuskan untuk menggunakan **Bun.JS**.
+
+Kenapa **Bun.JS**?
+
+Karena:
+- Mirip seperti **Node.JS**
+- Lebih mudah untuk dikembangkan
+- Performa sangat cepat
+- Development experience lebih enak
+
+---
+
+### Q: Berarti versi C Programming-nya hilang dong?
+
+A: Tidak hilang.
+
+Versi **C Programming** masih ada, tetapi sudah dipindahkan ke branch [legacy](https://github.com/KevinAdhaikal/KasirKu/tree/legacy).
+
+---
+
+### Q: Kenapa waktu itu anda menggunakan bahasa C?
+
+A: Saya menggunakan bahasa **C** pada waktu itu karena saya ingin mencoba belajar bahasa C dengan cara membuat aplikasi ini.
+
+Dan ternyata... **susah juga** 😂  
+Akhirnya saya memutuskan untuk beralih ke **Bun.JS**, wkwk.
+
+Tapi bukan cuma itu alasannya. Saya juga sempat memilih **C Programming** karena beberapa hal:
+
+- Supaya aplikasinya bisa berjalan di **hardware low-end** (seperti Set-Top Box bekas, Android bekas, dan perangkat lama lainnya)
+- Waktu itu saya juga lagi **tergila-gila dengan optimasi performa**
+
+Dan ternyata... project ini malah **mangkrak sekitar 1 tahun**.
+
+Akhirnya setelah cukup lama berhenti, saya memutuskan untuk melanjutkan project ini lagi 😂
+
+---
+
+### Q: Kapan anda melanjutkan project ini dan mengapa anda melanjutkan project ini?
+
+A: Saya mulai melanjutkan project ini sekitar **bulan puasa**, kira-kira **3 Maret 2026**.
+
+Saya melanjutkan project ini dengan beberapa alasan:
+
+- Untuk **portofolio** saya
+- Supaya aplikasi ini bisa **bermanfaat dan digunakan oleh orang lain**
+- Mengisi **waktu luang** dengan membuat project
+- Belajar lebih dalam lagi tentang:
+  - Programming
+  - Database
+  - Basic security
+  - Basic networking (seperti **Realtime SSE**, Query, dll)
+
+### Q: Pelajaran apa yang bisa diambil dari project ini?
+
+**A:**  
+Hmmmm... pelajaran yang bisa diambil dari project ini sih...
+
+#### Jangan mempersulit diri sendiri & jangan membuat sesuatu yang gampang menjadi sulit
+
+Waktu saya membuat aplikasi ini dengan **bahasa C**, sebenarnya saya malah **mempersulit diri saya sendiri**.
+
+Sesuatu yang sebenarnya bisa dibuat **lebih simpel dan mudah**, malah jadi **sangat rumit**. Akibatnya development jadi lambat, bahkan sempat membuat **project ini mangkrak kurang lebih selama 1 tahun**.
+
+Padahal sebenarnya ada bahasa pemrograman lain yang **lebih mudah untuk dikembangkan**, lebih mudah dibaca, dan juga **lebih mudah untuk orang lain yang ingin berkontribusi ke project ini**.
+
+Dari situ saya belajar bahwa kadang kita tidak perlu selalu memilih solusi yang paling "low level" atau paling "optimal".  
+Yang penting adalah **project bisa berkembang, bisa diselesaikan, dan bisa digunakan oleh orang lain.**
+
 # Credit
 - AdminLTE 3 Template by [AdminLTE.io](https://adminlte.io/)
 - Icon Cash Register by [Kameleon (icon-icons.com)](https://icon-icons.com/icon/cashier-cash-register/118071)
