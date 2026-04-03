@@ -1,9 +1,6 @@
 const sidebar_data = `<ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
   <li class="section_check" style="display: none;" data-value="4">
     <ul class="nav nav-pills nav-sidebar flex-column">
-      <li class="nav-item">
-        <hr style="border-color: rgba(255,255,255,0.1); margin: 8px 0;">
-      </li>
       <li class="nav-header">DASHBOARD</li>
       <li class="nav-item">
         <a href="/" class="nav-link nav-redirect" data-url="/">
