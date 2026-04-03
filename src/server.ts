@@ -4,6 +4,7 @@ import { post_method } from "./method_function/post_method";
 import { patch_method } from "./method_function/patch_method";
 import { delete_method } from "./method_function/delete_method";
 import { global } from "./global";
+import { reader } from "./utils/utils";
 
 let is_server_closed = false;
 let bun_serve: any;
@@ -24,6 +25,8 @@ async function stop_server() {
         global.rate_limit.destroy();
         global.user_sessions.destroy();
 
+        reader.cancel();
+        
         console.log("[LOG] Server has been stopped!");
     }
 }

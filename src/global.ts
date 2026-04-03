@@ -34,7 +34,7 @@ export const global = {
     // config file
     config: {
         "listen_port": 443,
-        "compile_html": true,
+        "compile_html": false,
         "db_type": "sqlite",
         "db_name": "kasirku",
         "postgresql": {

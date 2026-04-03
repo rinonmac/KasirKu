@@ -2,7 +2,7 @@ import { readdir, mkdir } from "node:fs/promises";
 import { ColumnDefinitionBuilder, InsertQueryBuilder, InsertResult, Kysely, MysqlDialect, PostgresDialect, sql } from "kysely";
 import { main } from "./src/server";
 import { global } from "./src/global";
-import { BunSqliteDialect, get_password_hash_only } from "./src/utils/utils";
+import { BunSqliteDialect, get_password_hash_only, user_input } from "./src/utils/utils";
 
 let default_svg_profile_img = `<?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
@@ -263,15 +263,101 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
     }
 }
 
-async function prepare() {
-    console.log("[LOG] Preparing Server...");
+function print_config(config: any) {
+    console.log("[LOG] ============================================");
+    console.log(`[LOG] Listening Port HTTPS: ${config.listen_port}`);
+    console.log(`[LOG] Compile assets saat startup: ${config.compile_html}`);
+    console.log(`[LOG] Database Type: ${config.db_type}`);
+    console.log(`[LOG] Database Name : ${config.db_name}`);
+    
+    if (global.config.db_type === "postgresql") {
+        console.log("[LOG]");
+        console.log("[LOG] PostgreSQL");
+        console.log(`[LOG] host: ${config.postgresql.host}`);
+        console.log(`[LOG] port: ${config.postgresql.port}`);
+        console.log(`[LOG] user: ${config.postgresql.user}`);
+        console.log(`[LOG] pass: ${config.postgresql.password}`);
+    }
+    else if (global.config.db_type === "mysql") {
+        console.log("[LOG]");
+        console.log("[LOG] MySQL");
+        console.log(`[LOG] Host: ${config.mysql.host}`);
+        console.log(`[LOG] Port: ${config.mysql.port}`);
+        console.log(`[LOG] Username: ${config.mysql.user}`);
+        console.log(`[LOG] Password: ${config.mysql.password}`);
+    }
 
+    console.log("[LOG] ============================================");
+}
+
+async function check_config() {
     if (!(await Bun.file("config.json").exists())) {
-        console.log("[LOG] Config file not found! Creating...");
+        console.log("[LOG] Config file not found!");
+
+        while(1) {
+            const answer = await user_input("[LOG] Gunakan konfigurasi default (y/n) ");
+
+            if (answer.toLowerCase() === "n") {
+                let port = await user_input("[LOG] Masukkan port HTTPS (Default: 443): ");
+                if (port) global.config.listen_port = Number(port);
+
+                let compile_html = await user_input("[LOG] Compile assets saat startup? (true/false) (Default: false): ");
+                if (compile_html) global.config.compile_html = compile_html.toLowerCase() === "true";
+
+                let db_type = await user_input("[LOG] Pilih database (sqlite / mysql / postgresql) (Default: sqlite): ");
+                if (db_type) global.config.db_type = db_type.toLowerCase();
+
+                let db_name = await user_input("[LOG] Nama database (Default: kasirku): ");
+                if (db_name) global.config.db_name = db_name.toLowerCase();
+
+                if (db_name === "postgresql") {
+                    console.log("[LOG] Konfigurasi PostgreSQL");
+                    let pg_host = await user_input("[LOG] PostgreSQL host (Default: 127.0.0.1): ");
+                    if (pg_host) global.config.postgresql.host = pg_host;
+
+                    let pg_port = await user_input("[LOG] PostgreSQL port (Default: 5432): ");
+                    if (pg_port) global.config.postgresql.port = Number(pg_port);
+
+                    let pg_user = await user_input("[LOG] PostgreSQL user (Default: root): ");
+                    if (pg_user) global.config.postgresql.user = pg_user;
+
+                    let pg_pass = await user_input("[LOG] PostgreSQL password (Default: admin): ");
+                    if (pg_pass) global.config.postgresql.password = pg_pass;
+                }
+
+                if (db_name === "mysql") {
+                    console.log("[LOG] Konfigurasi MySQL");
+                    let mysql_host = await user_input("[LOG] MySQL host (Default: 127.0.0.1): ");
+                    if (mysql_host) global.config.mysql.host = mysql_host;
+
+                    let mysql_port = await user_input("[LOG] MySQL port (Default: 3306): ");
+                    if (mysql_port) global.config.mysql.port = Number(mysql_port);
+
+                    let mysql_user = await user_input("[LOG] MySQL user (Default: root): ");
+                    if (mysql_user) global.config.mysql.user = mysql_user;
+
+                    let mysql_pass = await user_input("[LOG] MySQL password (Default: root): ");
+                    if (mysql_pass) global.config.mysql.password = mysql_pass;
+                }
+            }
+
+            print_config(global.config);
+
+            if ((await user_input("[LOG] Apakah konfigurasi ini sudah benar? (y/n) ")).toLowerCase() === "y") break;
+        }
 
         await Bun.file("config.json").write(JSON.stringify(global.config, null, 4));
         console.log("[LOG] Config file has been created");
-    } else global.config = await Bun.file("config.json").json();
+    } else {
+        global.config = await Bun.file("config.json").json();
+        print_config(global.config);
+    }
+}
+
+async function prepare() {
+    console.log("[LOG] Preparing Server...");
+
+    await check_config();
 
     if (global.config.compile_html) {
        try {
