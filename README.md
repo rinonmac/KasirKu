@@ -121,6 +121,22 @@ A: Saya membuat project ini **open-source** karena beberapa alasan:
 - Supaya orang lain juga bisa **berkontribusi dan membantu mengembangkan project ini**
 - Supaya project ini bisa **berguna bagi lebih banyak orang**
 
+---
+
+### Q: Kenapa orang harus menggunakan KasirKu dibanding aplikasi kasir lain?
+
+A: Karena aplikasi **KasirKu** dibuat dengan fokus pada kesederhanaan, performa, dan kemudahan penggunaan.
+
+Beberapa keunggulannya:
+
+- Ringan dan tidak membutuhkan resource besar
+- Open-source, jadi siapa saja bisa melihat dan mempelajari source code-nya
+- Bisa berjalan di hardware low-end (misalnya perangkat lama)
+- Realtime data, jadi tidak perlu refresh halaman (menggunakan **SSE**)
+- Menggunakan SPA (Single Page Application), sehingga perpindahan halaman terasa lebih cepat tanpa reload
+
+---
+
 ### Q: Dulu namanya `aplikasikasir`. Kenapa diganti menjadi `KasirKu`?
 
 A: Menurut saya... nama itu terasa seperti hanya deskripsi aplikasi saja, bukan sebuah brand.
