@@ -17,6 +17,27 @@
 
 **KasirKu** adalah aplikasi **Point of Sale (PoS)** yang dibuat untuk membantu pemilik usaha mengelola transaksi kasir dengan lebih mudah.
 
+## Table of contents
+- [Fitur](#fitur)
+- [Requrements](#requirements)
+- [Cara Menjalankan](#cara-menjalankan)
+  - [Menggunakan Bun](#pakai-bun)
+  - [Pakai Docker](#pakai-docker)
+- [Akses](#akses)
+- [QnA](#qna)
+  - [Q: Kenapa Anda membuat aplikasi ini?](#q-kenapa-anda-membuat-aplikasi-ini)
+  - [Q: Target pengguna KasirKu itu siapa aja?](#q-target-pengguna-kasirku-itu-siapa-aja)
+  - [Q: Kenapa KasirKu dibuat open-source?](#q-kenapa-kasirku-dibuat-open-source)
+  - [Q: Kenapa orang harus menggunakan KasirKu dibanding aplikasi kasir lain?](#q-kenapa-orang-harus-menggunakan-kasirku-dibanding-aplikasi-kasir-lain)
+  - [Q: Dulu namanya `aplikasikasir`. Kenapa diganti menjadi `KasirKu`?](#q-dulu-namanya-aplikasikasir-kenapa-diganti-menjadi-kasirku)
+  - [Q: Dulu project ini menggunakan bahasa C. Kenapa sekarang diganti ke Bun.JS?](#q-dulu-project-ini-menggunakan-bahasa-c-kenapa-sekarang-diganti-ke-bunjs)
+  - [Q: Berarti versi C Programming-nya hilang dong?](#q-berarti-versi-c-programming-nya-hilang-dong)
+  - [Q: Kenapa waktu itu anda menggunakan bahasa C?](#q-kenapa-waktu-itu-anda-menggunakan-bahasa-c)
+  - [Q: Kapan anda melanjutkan project ini dan mengapa anda melanjutkan project ini?](#q-kapan-anda-melanjutkan-project-ini-dan-mengapa-anda-melanjutkan-project-ini)
+  - [Q: Kalo misalnya Anda menggunakan Bun.JS, berarti dependencies / resource nya akan berat dong?](#q-kalo-misalnya-anda-menggunakan-bunjs-berarti-dependencies--resource-nya-akan-berat-dong)
+  - [Q: Pelajaran apa yang bisa diambil dari project ini?](#q-pelajaran-apa-yang-bisa-diambil-dari-project-ini)
+- [Credit](#credit)
+
 ## Fitur
 - **Point of Sale System**  
   Mendukung proses transaksi penjualan barang secara cepat dan sederhana.
@@ -91,12 +112,12 @@ docker run -d -p 80:80 -p 443:443 \
 ```
 
 ## Akses
-Buka `https://localhost` di browser. Login default: `admin` / `admin`.
+Buka `https://localhost` di browser, dan untuk default Username / Password: `admin` / `admin`.
 
 ## QnA
 ### Q: Kenapa Anda membuat aplikasi ini?
 
-Orang tua saya mempunyai toko, dan dari situ saya kepikiran untuk membuat aplikasi kasir sendiri.  
+A: Orang tua saya mempunyai toko, dan dari situ saya kepikiran untuk membuat aplikasi kasir sendiri.  
 Akhirnya pada saat saya masih **SMK kelas 2**, saya mulai bikin aplikasi ini.
 
 ---
@@ -247,7 +268,7 @@ Padahal sebenarnya ada bahasa pemrograman lain yang **lebih mudah untuk dikemban
 Dari situ saya belajar bahwa kadang kita tidak perlu selalu memilih solusi yang paling "low level" atau paling "optimal".  
 Yang penting adalah **project bisa berkembang, bisa diselesaikan, dan bisa digunakan oleh orang lain.**
 
-# Credit
+## Credit
 - AdminLTE 3 Template by [AdminLTE.io](https://adminlte.io/)
 - Icon Cash Register by [Kameleon (icon-icons.com)](https://icon-icons.com/icon/cashier-cash-register/118071)
 - NProgress by [rstacruz](https://github.com/rstacruz/nprogress)
