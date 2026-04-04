@@ -1,4 +1,5 @@
 import { readdir, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import { ColumnDefinitionBuilder, InsertQueryBuilder, InsertResult, Kysely, MysqlDialect, PostgresDialect, sql } from "kysely";
 import { main } from "./src/server";
 import { global } from "./src/global";
@@ -265,10 +266,13 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
 
 function print_config(config: any) {
     console.log("[LOG] ============================================");
-    console.log(`[LOG] Listening Port HTTPS: ${config.listen_port}`);
+    console.log(`[LOG] Listening Port ${config.use_tls ? "HTTPS" : "HTTP"}: ${config.listen_port}`);
+    console.log(`[LOG] Use TLS: ${config.use_tls}`);
     console.log(`[LOG] Compile assets saat startup: ${config.compile_html}`);
     console.log(`[LOG] Database Type: ${config.db_type}`);
     console.log(`[LOG] Database Name : ${config.db_name}`);
+    console.log(`[LOG] TLS Key Path: ${config.tls_key_path}`);
+    console.log(`[LOG] TLS Cert Path: ${config.tls_cert_path}`);
     
     if (global.config.db_type === "postgresql") {
         console.log("[LOG]");
@@ -290,15 +294,149 @@ function print_config(config: any) {
     console.log("[LOG] ============================================");
 }
 
+function get_env_value(key: string): string | undefined {
+    const value = Bun.env[key] ?? process.env[key];
+    if (value === undefined) return undefined;
+    const trimmed = String(value).trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function get_env_int(key: string): number | undefined {
+    const value = get_env_value(key);
+    if (!value) return undefined;
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function get_env_bool(key: string): boolean | undefined {
+    const value = get_env_value(key)?.toLowerCase();
+    if (!value) return undefined;
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return undefined;
+}
+
+function has_any_env_config() {
+    const keys = [
+        "APP_LISTEN_PORT",
+        "APP_USE_TLS",
+        "APP_COMPILE_HTML",
+        "DB_TYPE",
+        "DB_NAME",
+        "POSTGRES_HOST",
+        "POSTGRES_PORT",
+        "POSTGRES_USER",
+        "POSTGRES_PASSWORD",
+        "MYSQL_HOST",
+        "MYSQL_PORT",
+        "MYSQL_USER",
+        "MYSQL_PASSWORD",
+        "TLS_KEY_PATH",
+        "TLS_CERT_PATH",
+    ];
+
+    for (const key of keys) {
+        if (get_env_value(key) !== undefined) return true;
+    }
+
+    return false;
+}
+
+function apply_config_patch(config: any) {
+    if (!config || typeof config !== "object") return;
+
+    if (typeof config.listen_port === "number") global.config.listen_port = config.listen_port;
+    if (typeof config.use_tls === "boolean") global.config.use_tls = config.use_tls;
+    if (typeof config.compile_html === "boolean") global.config.compile_html = config.compile_html;
+    if (typeof config.db_type === "string") global.config.db_type = config.db_type.toLowerCase();
+    if (typeof config.db_name === "string") global.config.db_name = config.db_name;
+    if (typeof config.tls_key_path === "string") global.config.tls_key_path = config.tls_key_path;
+    if (typeof config.tls_cert_path === "string") global.config.tls_cert_path = config.tls_cert_path;
+
+    if (config.postgresql && typeof config.postgresql === "object") {
+        if (typeof config.postgresql.host === "string") global.config.postgresql.host = config.postgresql.host;
+        if (typeof config.postgresql.port === "number") global.config.postgresql.port = config.postgresql.port;
+        if (typeof config.postgresql.user === "string") global.config.postgresql.user = config.postgresql.user;
+        if (typeof config.postgresql.password === "string") global.config.postgresql.password = config.postgresql.password;
+    }
+
+    if (config.mysql && typeof config.mysql === "object") {
+        if (typeof config.mysql.host === "string") global.config.mysql.host = config.mysql.host;
+        if (typeof config.mysql.port === "number") global.config.mysql.port = config.mysql.port;
+        if (typeof config.mysql.user === "string") global.config.mysql.user = config.mysql.user;
+        if (typeof config.mysql.password === "string") global.config.mysql.password = config.mysql.password;
+    }
+}
+
+function apply_env_config() {
+    const listen_port = get_env_int("APP_LISTEN_PORT");
+    if (listen_port !== undefined) global.config.listen_port = listen_port;
+
+    const use_tls = get_env_bool("APP_USE_TLS");
+    if (use_tls !== undefined) global.config.use_tls = use_tls;
+
+    const compile_html = get_env_bool("APP_COMPILE_HTML");
+    if (compile_html !== undefined) global.config.compile_html = compile_html;
+
+    const db_type = get_env_value("DB_TYPE");
+    if (db_type) global.config.db_type = db_type.toLowerCase();
+
+    const db_name = get_env_value("DB_NAME");
+    if (db_name) global.config.db_name = db_name;
+
+    const pg_host = get_env_value("POSTGRES_HOST");
+    if (pg_host) global.config.postgresql.host = pg_host;
+
+    const pg_port = get_env_int("POSTGRES_PORT");
+    if (pg_port !== undefined) global.config.postgresql.port = pg_port;
+
+    const pg_user = get_env_value("POSTGRES_USER");
+    if (pg_user) global.config.postgresql.user = pg_user;
+
+    const pg_password = get_env_value("POSTGRES_PASSWORD");
+    if (pg_password) global.config.postgresql.password = pg_password;
+
+    const mysql_host = get_env_value("MYSQL_HOST");
+    if (mysql_host) global.config.mysql.host = mysql_host;
+
+    const mysql_port = get_env_int("MYSQL_PORT");
+    if (mysql_port !== undefined) global.config.mysql.port = mysql_port;
+
+    const mysql_user = get_env_value("MYSQL_USER");
+    if (mysql_user) global.config.mysql.user = mysql_user;
+
+    const mysql_password = get_env_value("MYSQL_PASSWORD");
+    if (mysql_password) global.config.mysql.password = mysql_password;
+
+    const tls_key_path = get_env_value("TLS_KEY_PATH");
+    if (tls_key_path) global.config.tls_key_path = tls_key_path;
+
+    const tls_cert_path = get_env_value("TLS_CERT_PATH");
+    if (tls_cert_path) global.config.tls_cert_path = tls_cert_path;
+}
+
 async function check_config() {
-    if (!(await Bun.file("config.json").exists())) {
+    const has_config_file = await Bun.file("config.json").exists();
+    const has_env_config = has_any_env_config();
+
+    if (has_config_file) {
+        apply_config_patch(await Bun.file("config.json").json());
+    }
+
+    apply_env_config();
+
+    if (!has_config_file && !has_env_config) {
         console.log("[LOG] Config file not found!");
 
         while(1) {
             const answer = await user_input("[LOG] Gunakan konfigurasi default (y/n) ");
 
             if (answer.toLowerCase() === "n") {
-                let port = await user_input("[LOG] Masukkan port HTTPS (Default: 443): ");
+                let use_tls = await user_input("[LOG] Gunakan TLS/HTTPS? (true/false) (Default: true): ");
+                if (use_tls) global.config.use_tls = use_tls.toLowerCase() === "true";
+
+                let port = await user_input(`[LOG] Masukkan port ${global.config.use_tls ? "HTTPS" : "HTTP"} (Default: ${global.config.use_tls ? 443 : 80}): `);
                 if (port) global.config.listen_port = Number(port);
 
                 let compile_html = await user_input("[LOG] Compile assets saat startup? (true/false) (Default: false): ");
@@ -310,7 +448,7 @@ async function check_config() {
                 let db_name = await user_input("[LOG] Nama database (Default: kasirku): ");
                 if (db_name) global.config.db_name = db_name.toLowerCase();
 
-                if (db_name === "postgresql") {
+                if (global.config.db_type === "postgresql") {
                     console.log("[LOG] Konfigurasi PostgreSQL");
                     let pg_host = await user_input("[LOG] PostgreSQL host (Default: 127.0.0.1): ");
                     if (pg_host) global.config.postgresql.host = pg_host;
@@ -325,7 +463,7 @@ async function check_config() {
                     if (pg_pass) global.config.postgresql.password = pg_pass;
                 }
 
-                if (db_name === "mysql") {
+                if (global.config.db_type === "mysql") {
                     console.log("[LOG] Konfigurasi MySQL");
                     let mysql_host = await user_input("[LOG] MySQL host (Default: 127.0.0.1): ");
                     if (mysql_host) global.config.mysql.host = mysql_host;
@@ -349,7 +487,9 @@ async function check_config() {
         await Bun.file("config.json").write(JSON.stringify(global.config, null, 4));
         console.log("[LOG] Config file has been created");
     } else {
-        global.config = await Bun.file("config.json").json();
+        if (!has_config_file && has_env_config) {
+            console.log("[LOG] Using environment configuration (.env). config.json not found.");
+        }
         print_config(global.config);
     }
 }
@@ -470,63 +610,65 @@ async function prepare() {
         console.log("[LOG] default.svg has been created!");
     }
 
-    // Create Certificate for SSL/TLS
-    if (!(await Bun.file("cert/key.pem").exists()) || !(await Bun.file("cert/cert.pem").exists())) {
-        const forge = (await import("node-forge")).default
+    if (global.config.use_tls) {
+        // Create Certificate for SSL/TLS
+        const tls_key_path = global.config.tls_key_path;
+        const tls_cert_path = global.config.tls_cert_path;
 
-        console.log("[LOG] Certificate not found! Creating self-signed certificate...");
-        try {
-            await mkdir("cert");
-        } catch(e) {
-            console.log("[WARNING]:", e)   
+        if (!(await Bun.file(tls_key_path).exists()) || !(await Bun.file(tls_cert_path).exists())) {
+            const forge = (await import("node-forge")).default
+
+            console.log("[LOG] Certificate not found! Creating self-signed certificate...");
+            await mkdir(dirname(tls_key_path), { recursive: true });
+            await mkdir(dirname(tls_cert_path), { recursive: true });
+
+            const pki = forge.pki;
+            const keys = pki.rsa.generateKeyPair(4096);
+            const cert = pki.createCertificate();
+
+            cert.publicKey = keys.publicKey;
+            cert.serialNumber = "01";
+
+            cert.validity.notBefore = new Date();
+            cert.validity.notAfter = new Date();
+            cert.validity.notAfter.setDate(cert.validity.notBefore.getDate() + 36500);
+
+            const attrs = [
+                { name: "commonName", value: "localhost" },
+            ];
+
+            cert.setSubject(attrs);
+            cert.setIssuer(attrs);
+
+            cert.setExtensions([
+                {
+                    name: "basicConstraints",
+                    cA: true,
+                },
+                {
+                    name: "keyUsage",
+                    digitalSignature: true,
+                    keyEncipherment: true,
+                    dataEncipherment: true,
+                },
+                {
+                    name: "subjectAltName",
+                    altNames: [
+                        {
+                            type: 2, // DNS
+                            value: "localhost",
+                        },
+                    ],
+                },
+            ]);
+
+            cert.sign(keys.privateKey, forge.md.sha256.create());
+
+            await Bun.write(tls_key_path, pki.privateKeyToPem(keys.privateKey));
+            await Bun.write(tls_cert_path, pki.certificateToPem(cert));
+
+            console.log("[LOG] Certificate SSL/TLS has been created!");
         }
-
-        const pki = forge.pki;
-        const keys = pki.rsa.generateKeyPair(4096);
-        const cert = pki.createCertificate();
-
-        cert.publicKey = keys.publicKey;
-        cert.serialNumber = "01";
-
-        cert.validity.notBefore = new Date();
-        cert.validity.notAfter = new Date();
-        cert.validity.notAfter.setDate(cert.validity.notBefore.getDate() + 36500);
-
-        const attrs = [
-            { name: "commonName", value: "localhost" },
-        ];
-
-        cert.setSubject(attrs);
-        cert.setIssuer(attrs);
-
-        cert.setExtensions([
-            {
-                name: "basicConstraints",
-                cA: true,
-            },
-            {
-                name: "keyUsage",
-                digitalSignature: true,
-                keyEncipherment: true,
-                dataEncipherment: true,
-            },
-            {
-                name: "subjectAltName",
-                altNames: [
-                    {
-                        type: 2, // DNS
-                        value: "localhost",
-                    },
-                ],
-            },
-        ]);
-
-        cert.sign(keys.privateKey, forge.md.sha256.create());
-
-        await Bun.write("cert/key.pem", pki.privateKeyToPem(keys.privateKey));
-        await Bun.write("cert/cert.pem", pki.certificateToPem(cert));
-
-        console.log("[LOG] Certificate SSL/TLS has been created!");
     }
 
     let version: any = null;
