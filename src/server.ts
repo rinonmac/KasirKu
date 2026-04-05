@@ -17,13 +17,9 @@ async function stop_server() {
         console.log("[LOG] Stopping Server...");
 
         bun_serve.stop();
-        if (bun_serve2) {
-            bun_serve2.stop();
-        }
+        if (bun_serve2) bun_serve2.stop();
 
-        if (global.database) {
-            await global.database.destroy();
-        }
+        if (global.database) await global.database.destroy();
 
         global.sse_clients.destroy();
         global.rate_limit.destroy();
@@ -38,9 +34,6 @@ async function stop_server() {
 export function main() {
     const protocol = global.config.use_tls ? "HTTPS" : "HTTP";
     console.log(`[LOG] ${protocol} Server running in port ${global.config.listen_port}`);
-
-    const tls_key_path = global.config.tls_key_path;
-    const tls_cert_path = global.config.tls_cert_path;
 
     const fetch_handler = async (req: Request, server: any) => {
         const url = new URL(req.url);
@@ -70,8 +63,8 @@ export function main() {
         bun_serve = Bun.serve({
             port: global.config.listen_port,
             tls: {
-                key: Bun.file(tls_key_path),
-                cert: Bun.file(tls_cert_path)
+                key: Bun.file(global.config.tls_key_path),
+                cert: Bun.file(global.config.tls_cert_path)
             },
             fetch: fetch_handler,
             error(err: Error) {
