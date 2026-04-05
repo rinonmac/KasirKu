@@ -177,11 +177,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
 }
 
 async function prepare() {
-    await Bun.spawn(["bun", "src/prepare.ts"], {
-        stdout: "inherit",
-        stderr: "inherit",
-        stdin: "inherit"
-    }).exited; // ini berisi yang prepare certificate, html build dan config file.
+    await Bun.$`bun src/prepare.ts`;
 
     global.config = (await Bun.file("config.json").exists()) ? JSON.parse(await Bun.file("config.json").text()) : global.config;
 

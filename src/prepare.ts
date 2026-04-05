@@ -2,7 +2,6 @@ const MAX_CONCURRENT = 4;
 
 import { dirname } from "node:path";
 import { global } from "../src/global";
-import { user_input } from "../src/utils/utils";
 import { readdir, mkdir } from "node:fs/promises";
 
 let future_import = {
@@ -10,6 +9,16 @@ let future_import = {
     minifyJS: null as any,
     CleanCSS: null as any,
     brotliCompressSync: null as any
+}
+
+const reader = Bun.stdin.stream().getReader();
+
+// user input
+async function user_input(question: string) {
+  process.stdout.write(question);
+
+  const { value } = await reader.read();
+  return new TextDecoder().decode(value).trim();
 }
 
 function print_config(config: any) {
@@ -184,7 +193,6 @@ async function check_config() {
 
     while (true) {
         const answer = await user_input("[LOG] Gunakan konfigurasi default (y/n) ");
-
         if (answer.toLowerCase() === "n") {
             let use_tls = await user_input("[LOG] Gunakan TLS/HTTPS? (true/false) (Default: true): ");
             if (use_tls) global.config.use_tls = use_tls.toLowerCase() === "true";
@@ -416,6 +424,7 @@ async function prepare() {
         }
     }
 
+    reader.cancel();
     process.exit(0);
 }
 

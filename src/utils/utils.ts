@@ -1,16 +1,6 @@
 import { Database } from "bun:sqlite";
 import { CompiledQuery, SqliteAdapter, SqliteIntrospector, SqliteQueryCompiler, type DatabaseConnection, type Dialect, type Driver, type QueryResult } from 'kysely';
 
-export const reader = Bun.stdin.stream().getReader();
-
-// user input
-export async function user_input(question: string) {
-  process.stdout.write(question);
-
-  const { value } = await reader.read();
-  return new TextDecoder().decode(value).trim();
-}
-
 // mime types
 export const mime_types: Record<string, string> = {
     html: "text/html",
