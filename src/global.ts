@@ -34,9 +34,12 @@ export const global = {
     // config file
     config: {
         "listen_port": 443,
+        "use_tls": true,
         "compile_html": false,
         "db_type": "sqlite",
         "db_name": "kasirku",
+        "tls_key_path": "cert/key.pem",
+        "tls_cert_path": "cert/cert.pem",
         "postgresql": {
             "host": "127.0.0.1",
             "port": 5432,
