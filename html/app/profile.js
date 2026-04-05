@@ -14,13 +14,16 @@ global.element = {
     username: document.getElementById("username"),
     change_profile_button: document.getElementById("change_profile_button"),
     change_photo_button: document.getElementById("change_photo_button"),
+    delete_photo_button: document.getElementById("delete_photo_button"),
     current_password: document.getElementById("current_password"),
     new_password: document.getElementById("new_password"),
     confirm_new_password: document.getElementById("confirm_new_password"),
     input: document.createElement('input'),
 
     controller_deinit: new AbortController(),
+
     is_change_photo: false,
+    change_photo_data: ",null",
     temp_date: new Date()
 };
 
@@ -69,11 +72,21 @@ function change_photo_button() {
         freader.onloadend = function(e) {
             global.element.profile_img3.src = e.target.result;
             global.element.is_change_photo = true;
+            global.element.delete_photo_button.disabled = false;
+            global.element.change_photo_data = e.target.result;
             check_change();
         }
     };
 
     global.element.input.click();
+}
+
+function delete_photo_button() {
+    global.element.profile_img3.src = "/profile_img/default.svg";
+    global.element.is_change_photo = true;
+    global.element.delete_photo_button.disabled = true;
+    global.element.change_photo_data = ",null";
+    check_change();
 }
 
 function check_change() {
@@ -119,7 +132,10 @@ async function fetch_current_profile() {
         global.element.username.value = res_json.username;
         global.element.role_profile2.innerText = res_json.role_name;
         
-        if (res_json.profile_img) global.element.profile_img3.src = res_json.profile_img;
+        if (res_json.profile_img) {
+            global.element.profile_img3.src = res_json.profile_img;
+            global.element.delete_photo_button.disabled = false;
+        } else global.element.delete_photo_button.disabled = true;
     }
     else if (res.status !== 404) {
         swal2_mixin.fire({
@@ -149,7 +165,7 @@ async function change_profile() {
             "new_full_name": global.element.full_name.value,
             "new_username": global.element.username.value,
             ...(global.element.is_change_photo ? {
-                "new_profile_img": global.element.profile_img3.src.split(",")[1]
+                "new_profile_img": global.element.change_photo_data.split(",")[1] ?? null
             } : {})
         })
     })
@@ -182,6 +198,7 @@ async function change_profile() {
         }
     }
 }
+
 
 async function change_password() {
     if (global.element.new_password.value.length < 8 ||  global.element.confirm_new_password.value.length < 8) return swal2_mixin.fire({

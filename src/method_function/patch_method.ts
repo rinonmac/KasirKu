@@ -192,25 +192,23 @@ export async function patch_method(req: Request, url: URL) {
                 };
 
                 if (new_profile_img) {
-                    const img_buffer = Buffer.from(<string>new_profile_img, "base64");
-                    const get_type = check_image_type(img_buffer);
-                    if (!get_type) return new Response("Bad Request", { status: 400 });
+                    if (new_profile_img === "null") update_data.profile_img = "";
+                    else {
+                        const img_buffer = Buffer.from(<string>new_profile_img, "base64");
+                        const get_type = check_image_type(img_buffer);
+                        if (!get_type) return new Response("Bad Request", { status: 400 });
 
-                    const file_path_img = `profile_img/${user_info.user_id}.${get_type}`;
-                    update_data.profile_img = `/${file_path_img}`;
+                        const file_path_img = `profile_img/${user_info.user_id}.${get_type}`;
+                        update_data.profile_img = `/${file_path_img}`;
 
-                    await db.updateTable('users')
-                    .set(update_data)
-                    .where('id', '=', user_info.user_id)
-                    .execute();
-
-                    await Bun.write(file_path_img, img_buffer);
-                } else {
-                    await db.updateTable('users')
-                    .set(update_data)
-                    .where('id', '=', user_info.user_id)
-                    .execute();
+                        await Bun.write(file_path_img, img_buffer);
+                    }
                 }
+                
+                await db.updateTable('users')
+                .set(update_data)
+                .where('id', '=', user_info.user_id)
+                .execute();
             } catch (e: any) {
                 if (e.code === "ER_DUP_ENTRY" || e.errno === 1062) return new Response("1", { status: 403 });
                 
