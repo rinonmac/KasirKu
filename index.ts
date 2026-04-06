@@ -1,13 +1,9 @@
 
-import { ColumnDefinitionBuilder, InsertQueryBuilder, InsertResult, Kysely, MysqlDialect, PostgresDialect, sql } from "kysely";
+import { Kysely, MysqlDialect, PostgresDialect, sql } from "kysely";
 import { main } from "./src/server";
 import { global } from "./src/global";
 import { BunSqliteDialect, get_password_hash_only } from "./src/utils/utils";
 import { mkdir } from "node:fs/promises";
-
-// ini buat bikin fungsi yang bisa dipake di semua database, karena mysql, postgres dan sqlite itu beda-beda syntax nya. jadi kita bikin fungsi seperti ini yang nanti isinya bakal disesuaikan sama database yang dipake.
-let insert_ignore: (q: InsertQueryBuilder<any, any, InsertResult>) => InsertQueryBuilder<any, any, InsertResult> = (q) => {return q.ignore()}
-let id_column: (col: ColumnDefinitionBuilder) => ColumnDefinitionBuilder;
 
 async function database_create_req(db: Kysely<any>, version: number, current_ms: number) { // database create requirement
     if (version < 1) { // Database Version 1.0
@@ -15,14 +11,14 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("roles")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("name", "varchar(255)", col => col.unique())
         .addColumn("permission_level", "integer")
         .addColumn("created_ms", "bigint")
         .addColumn("modified_ms", "bigint")
         .execute();
 
-        await insert_ignore(db.insertInto("roles").values({
+        await global.sql_dialect.insert_ignore(db.insertInto("roles").values({
             name: "Administrator",
             permission_level: global.permissions.ADMINISTRATOR,
             created_ms: current_ms,
@@ -33,7 +29,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("users")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("username", "varchar(255)", col => col.unique())
         .addColumn("full_name", "text")
         .addColumn("password_hash", "text")
@@ -50,7 +46,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         )
         .execute();
 
-        await insert_ignore(db.insertInto("users").values({
+        await global.sql_dialect.insert_ignore(db.insertInto("users").values({
             username: "admin",
             full_name: "Administrator",
             password_hash: get_password_hash_only(
@@ -69,13 +65,13 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("kategori_barang")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("nama_kategori", "text", col => col.unique())
         .addColumn("created_ms", "bigint")
         .addColumn("modified_ms", "bigint")
         .execute();
 
-        await insert_ignore(db.insertInto("kategori_barang")
+        await global.sql_dialect.insert_ignore(db.insertInto("kategori_barang")
         .values({
             nama_kategori: "Tidak Ada",
             created_ms: current_ms,
@@ -86,7 +82,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("barang")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("nama_barang", "text")
         .addColumn("stok_barang", "integer")
         .addColumn("kategori_barang_id", "integer")
@@ -108,7 +104,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("barang_masuk")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("barang_id", "integer")
         .addColumn("deskripsi", "text")
         .addColumn("jumlah_barang", "integer")
@@ -128,7 +124,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("penjualan")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("total_barang", "integer")
         .addColumn("total_harga_modal", "integer")
         .addColumn("total_harga_jual", "integer")
@@ -141,7 +137,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("penjualan_item")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("penjualan_id", "integer", col => col.notNull())
         .addColumn("barang_id", "integer", col => col.notNull())
         .addColumn("nama_barang", "text")
@@ -164,7 +160,7 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         await db.schema
         .createTable("pembukuan")
         .ifNotExists()
-        .addColumn("id", "integer", col => id_column(col))
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
         .addColumn("tipe", "integer", col => col.check(sql`tipe IN (0,1)`))
         .addColumn("deskripsi", "text", col => col.defaultTo(null))
         .addColumn("jumlah_uang", "integer")
@@ -198,7 +194,7 @@ async function prepare() {
                 })
             });
 
-            id_column = col => col.primaryKey();
+            global.sql_dialect.id_column = col => col.primaryKey();
             break;
         }
         case "mysql": {
@@ -224,7 +220,7 @@ async function prepare() {
                 })
             })
 
-            id_column = col => col.primaryKey().autoIncrement();
+            global.sql_dialect.id_column = col => col.primaryKey().autoIncrement();
             break;
         }
         case "postgresql": {
@@ -260,8 +256,16 @@ async function prepare() {
                 })
             })
 
-            insert_ignore = (q) => {return  q.onConflict(oc => oc.doNothing())};
-            id_column = col => col.primaryKey().generatedAlwaysAsIdentity();
+            global.sql_dialect.insert_ignore = (q) => {return  q.onConflict(oc => oc.doNothing())};
+            global.sql_dialect.id_column = col => col.primaryKey().generatedAlwaysAsIdentity();
+            global.sql_dialect.insert_return_id = async (db: Kysely<any>, table: string, values: {}): Promise<Number> => {
+                const result = await db
+                    .insertInto(table)
+                    .values(values).returning("id")
+                    .executeTakeFirstOrThrow()
+
+                return Number(result.id)
+            }
             break;
         }
         default: {
@@ -287,7 +291,7 @@ async function prepare() {
     database_create_req(global.database, version, Date.now());
 
     if (version === 0) {
-        await insert_ignore(global.database.insertInto("kasirku")
+        await global.sql_dialect.insert_ignore(global.database.insertInto("kasirku")
         .values({ k: "version", v: "1" }))
         .execute();
     } else {

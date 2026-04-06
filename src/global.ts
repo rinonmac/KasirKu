@@ -2,7 +2,7 @@ import { user_session } from "./user_session/user_session";
 import { mutex } from "./utils/utils";
 import { sse_server } from "./sse_server/sse_server";
 import { rate_limit } from "./rate_limit/rate_limit";
-import { Kysely } from "kysely";
+import { ColumnDefinitionBuilder, InsertQueryBuilder, InsertResult, Kysely } from "kysely";
 
 export const global = {
     // Date
@@ -43,14 +43,14 @@ export const global = {
         "postgresql": {
             "host": "127.0.0.1",
             "port": 5432,
-            "user": "root",
-            "password": "admin"
+            "user": "postgres",
+            "password": ""
         },
         "mysql": {
             "host": "127.0.0.1",
             "port": 3306,
             "user": "root",
-            "password": "root"
+            "password": ""
         }
     },
 
@@ -61,6 +61,24 @@ export const global = {
         KASIR: 1 << 2,
         MANAGE_PEMBUKUAN: 1 << 3,
         DASHBOARD: 1 << 4
+    },
+
+    // sql dialect function
+    sql_dialect: {
+        insert_ignore: (q: InsertQueryBuilder<any, any, InsertResult>): InsertQueryBuilder<any, any, InsertResult> => {
+            return q.ignore();
+        },
+        insert_return_id: async (db: Kysely<any>, table: string, values: {}): Promise<Number> => {
+            const result = await db
+                .insertInto(table)
+                .values(values)
+                .executeTakeFirstOrThrow()
+
+            return Number(result.insertId)
+        },
+        id_column: (col: ColumnDefinitionBuilder): ColumnDefinitionBuilder => {
+            return col;
+        },
     },
 
     default_svg_profile_img: `<?xml version="1.0" encoding="utf-8"?>

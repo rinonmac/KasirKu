@@ -64,9 +64,7 @@ export async function post_method(req: Request, url: URL) {
             const now = Date.now();
             let last_row;
             try {
-                const result = await db
-                .insertInto('barang')
-                .values({
+                last_row = await global.sql_dialect.insert_return_id(db, "barang", {
                     nama_barang,
                     stok_barang,
                     kategori_barang_id,
@@ -76,9 +74,6 @@ export async function post_method(req: Request, url: URL) {
                     created_ms: now,
                     modified_ms: now
                 })
-                .executeTakeFirstOrThrow();
-
-                last_row = Number(result.insertId);
             } catch (e) {
                 console.log("An error occured in post_method.ts at /barang:", e);
                 return new Response("Internal Server Error", { status: 500 });
@@ -117,16 +112,11 @@ export async function post_method(req: Request, url: URL) {
             const now = Date.now();
             let last_row;
             try {
-                const result = await db
-                .insertInto('kategori_barang')
-                .values({
+                last_row = await global.sql_dialect.insert_return_id(db, "kategori_barang", {
                     nama_kategori,
                     created_ms: now,
                     modified_ms: now
                 })
-                .executeTakeFirstOrThrow();
-
-                last_row = Number(result.insertId);
             } catch (e: any) {
                 if (e.code === "ER_DUP_ENTRY" || e.errno === 1062) return new Response("1", { status: 403 });
                 console.log("An error occured in post_method.ts at /kategori_barang:", e);
@@ -199,9 +189,7 @@ export async function post_method(req: Request, url: URL) {
 
             try {
                 await db.transaction().execute(async (trx) => {
-                    const penjualan = await trx
-                    .insertInto('penjualan')
-                    .values({
+                    const last_row  = await global.sql_dialect.insert_return_id(trx, "penjualan", {
                         total_barang,
                         total_harga_modal,
                         total_harga_jual,
@@ -209,9 +197,6 @@ export async function post_method(req: Request, url: URL) {
                         created_ms: now,
                         modified_ms: now
                     })
-                    .executeTakeFirstOrThrow();
-
-                    const last_row = Number(penjualan.insertId);
 
                     await trx
                     .insertInto('pembukuan')
@@ -292,19 +277,14 @@ export async function post_method(req: Request, url: URL) {
             let last_row;
 
             try {
-                const result = await db
-                .insertInto('pembukuan')
-                .values({
+                last_row = await global.sql_dialect.insert_return_id(db, "pembukuan", {
                     tipe: 1,
                     deskripsi,
                     jumlah_uang: nominal,
                     tanggal_key: date_now,
                     created_ms: now,
                     modified_ms: now
-                })
-                .executeTakeFirst();
-
-                last_row = Number(result.insertId);
+                });
             } catch (e) {
                 console.log("Unexpected error in post_method.ts at /pengeluaran:", e);
                 return new Response("Internal Server Error", { status: 500 });
@@ -354,18 +334,15 @@ export async function post_method(req: Request, url: URL) {
 
             try {
                 last_row = await db.transaction().execute(async (trx) => {
-                    const result = await trx
-                    .insertInto('barang_masuk')
-                    .values({
+                    const last_row = await global.sql_dialect.insert_return_id(trx, "barang_masuk", {
                         tanggal_key,
                         barang_id,
                         deskripsi,
                         jumlah_barang,
                         created_ms: now,
                         modified_ms: now
-                    })
-                    .executeTakeFirstOrThrow();
-
+                    });
+                    
                     await trx
                     .updateTable('barang')
                     .set({
@@ -374,7 +351,7 @@ export async function post_method(req: Request, url: URL) {
                     .where('id', '=', barang_id)
                     .execute();
 
-                    return Number(result.insertId);;
+                    return last_row;
                 });
             } catch (e) {
                 console.log("An error occured in post_method.ts at /barang_masuk:", e);
