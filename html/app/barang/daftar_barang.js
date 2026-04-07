@@ -32,31 +32,35 @@ global.element = {
             }
         }
     }),
+    kategori_barang_obj: new Map(),
+
     modal_daftar_barang: $("#modal_daftar_barang"),
     daftar_barang_table: $("#daftar_barang_table").DataTable({
-        rowId: 6,
+        rowId: "id",
         columns: [
-            {
-                data: 0,
+            { // nama barang
+                data: "nama_barang",
                 render: $.fn.dataTable.render.text(),
             },
-            {
-                data: 1,
+            { // stok barang
+                data: "stok_barang",
                 render: $.fn.dataTable.render.text()
             },
-            {
-                data: 2,
+            { // kategori barang
+                data: "kategori_barang",
                 render: $.fn.dataTable.render.text()
             },
-            {
-                data: 3,
+            { // harga barang
+                data: "harga_barang",
                 render: $.fn.dataTable.render.text()
             },
-            {
-                data: 4,
+            { // barcode barang
+                data: "barcode_barang",
                 render: $.fn.dataTable.render.text()
             },
-            {data: 5},
+            { // action
+                data: "action"
+            },
         ],
         columnDefs: [
             {
@@ -79,9 +83,9 @@ global.deinit = function() {
     document.removeEventListener("keydown", document_keydown);
 }
 
-global.refresh_handler = function() {
-    fetch_kategori_barang();
-    fetch_daftar_barang();
+global.refresh_handler = async function() {
+    await fetch_kategori_barang();
+    await fetch_daftar_barang();
 }
 
 global.element.modal_daftar_barang.on("shown.bs.modal", function() {
@@ -162,38 +166,40 @@ async function sse_handler(e) {
     if (e.type === 2) { // daftar barang
         switch(e.code) {
             case "TAMBAH_BARANG": {
-                const data = await fetch_barang_id(e.data.id);
-                global.element.daftar_barang_table.row.add([
-                    data.nama_barang,
-                    format_thousand_separator.format(data.stok_barang),
-                    data.nama_kategori,
-                    "Rp" + money_format_bigint(BigInt(data.harga_jual)),
-                    data.barcode_barang ?? "Tidak Ada",
-                    `<center>
-                    <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
-                    <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
+                global.element.daftar_barang_table.row.add({
+                    nama_barang: e.data.nama_barang,
+                    stok_barang: format_thousand_separator.format(e.data.stok_barang),
+                    kategori_barang: global.element.kategori_barang_obj.get(e.data.kategori_barang_id),
+                    harga_barang: "Rp" + money_format_bigint(BigInt(e.data.harga_jual)),
+                    barcode_barang: e.data.barcode_barang ?? "Tidak Ada",
+                    action: `<center>
+                    <button type="button" class="text-right btn btn-primary action_edit" value="${e.data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
+                    <button type="button" class="text-right btn btn-danger action_delete" value="${e.data.id}"><i class="fa fa-trash"></i> Hapus</button>
                     </center>`,
-                    data.id
-                ]);
+                    id: e.data.id
+                });
                 global.element.daftar_barang_table.draw();
                 break;
             }
             case "UPDATE_BARANG": {
-                const data = await fetch_barang_id(e.data.id);
+                const row = global.element.daftar_barang_table.row("#" + e.data.id)
+                const data = e.data;
 
-                global.element.daftar_barang_table.row("#" + e.data.id).data([
-                    data.nama_barang,
-                    format_thousand_separator.format(data.stok_barang),
-                    data.nama_kategori,
-                    "Rp" + money_format_bigint(BigInt(data.harga_jual)),
-                    data.barcode_barang ?? "Tidak Ada",
-                    `<center>
-                    <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
-                    <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
-                    </center>`,
-                    data.id
-                ]);
-                global.element.daftar_barang_table.draw();
+                if (data.stok_barang) data.stok_barang = format_thousand_separator.format(data.stok_barang);
+                if (data.kategori_barang_id) data.kategori_barang = global.element.kategori_barang_obj.get(e.data.kategori_barang_id) ?? "Tidak Ada";
+                if (data.harga_jual) data.harga_barang = "Rp" + money_format_bigint(BigInt(e.data.harga_jual));
+                if (!data.barcode_barang) data.barcode_barang = "Tidak Ada";
+                data.action = `
+                <center>
+                    <button type="button" class="text-right btn btn-primary action_edit" value="${e.data.id}">
+                        <i class="fa fa-eye"></i> Lihat/Edit
+                    </button>
+                    <button type="button" class="text-right btn btn-danger action_delete" value="${e.data.id}">
+                        <i class="fa fa-trash"></i> Hapus
+                    </button>
+                </center>`
+
+                row.data({...row.data(), ...data}).draw();
                 break;
             }
             case "DELETE_BARANG": {
@@ -209,16 +215,19 @@ async function sse_handler(e) {
     else if (e.type === 3) { // kategori barang
         switch(e.code) {
             case "TAMBAH_KATEGORI": {
+                global.element.kategori_barang_obj.set(e.data.id, e.data.nama_kategori);
                 if (global.element.is_tambah_kategori) global.element.is_tambah_kategori = false;
                 else global.element.kategori_barang.append(new Option(e.data.nama_kategori, e.data.id, true, true)).trigger('change');
                 break;
             }
             case "UPDATE_KATEGORI": {
+                global.element.kategori_barang_obj.set(e.data.id, e.data.nama_kategori);
                 const option = global.element.kategori_barang.find(`option[value="${e.data.id}"]`);
                 option.text(e.data.nama_kategori).trigger("change");
                 break;
             }
             case "DELETE_KATEGORI": {
+                global.element.kategori_barang_obj.delete(e.data.id);
                 global.element.kategori_barang.find(`option[value="${e.data.id}"]`).remove().trigger("change");
                 break;
             }
@@ -230,7 +239,8 @@ async function sse_handler(e) {
             case "TAMBAH_PENJUALAN": {
                 for (const items of e.data.items) {
                     const current_data = global.element.daftar_barang_table.row("#" + items.id).data();
-                    current_data[1] = Number(current_data[1]) - items.jumlah_barang;
+
+                    current_data.stok_barang = Number(current_data.stok_barang.replaceAll(".", "")) - items.jumlah_barang;
                     global.element.daftar_barang_table.row("#" + items.id).data(current_data, false);
                 }
                 global.element.daftar_barang_table.draw();
@@ -454,10 +464,12 @@ async function fetch_kategori_barang() {
     
     if (res.status === 200) {
         const res_json = await res.json();
+
         const select = global.element.kategori_barang[0];
         select.innerHTML = "";
 
         for (const data of res_json) {
+            global.element.kategori_barang_obj.set(data.id, data.nama_kategori)
             const option = document.createElement("option");
             option.value = String(data.id);
             option.textContent = data.nama_kategori;
@@ -481,32 +493,6 @@ async function fetch_kategori_barang() {
     }
 }
 
-async function fetch_barang_id(id) {
-    if (!id) return;
-    let res = await fetch(`/api/barang?id=${id}`, {
-        method: "GET",
-        headers: {
-            token: localStorage.getItem("token")
-        }
-    })
-
-    if (res.status === 200) return await res.json();
-    else {
-        const status = await res.text();
-
-        switch(status) {
-            default: {
-                swal2_mixin.fire({
-                    icon: "error",
-                    title: "Terjadi Kesalahan! Silahkan coba lagi nanti."
-                });
-                break;
-            }
-        }
-        return null;
-    }
-}
-
 async function fetch_daftar_barang() {
     global.element.daftar_barang_table.clear();
     let res = await fetch("/api/barang", {
@@ -519,18 +505,18 @@ async function fetch_daftar_barang() {
     if (res.status === 200) {
         const res_json = await res.json();
         for (const data of res_json) {
-            global.element.daftar_barang_table.row.add([
-                data.nama_barang,
-                format_thousand_separator.format(data.stok_barang),
-                data.nama_kategori,
-                "Rp" + money_format_bigint(BigInt(data.harga_jual)),
-                data.barcode_barang ?? "Tidak Ada",
-                `<center>
+            global.element.daftar_barang_table.row.add({
+                nama_barang: data.nama_barang,
+                stok_barang: format_thousand_separator.format(data.stok_barang),
+                kategori_barang: data.nama_kategori,
+                harga_barang: "Rp" + money_format_bigint(BigInt(data.harga_jual)),
+                barcode_barang: data.barcode_barang ?? "Tidak Ada",
+                action: `<center>
                 <button type="button" class="text-right btn btn-primary action_edit" value="${data.id}"><i class="fa fa-eye"></i> Lihat/Edit</button>
                 <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
                 </center>`,
-                data.id
-            ]);
+                id: data.id
+            });
         }
     }
 
@@ -576,7 +562,3 @@ async function edit_daftar_barang(id) {
         }
     }
 }
-
-(async function() {
-    global.refresh_handler();
-})();

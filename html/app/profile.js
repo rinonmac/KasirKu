@@ -31,31 +31,33 @@ global.element.input.type = 'file';
 global.element.input.accept = "image/*";
 global.element.input.style.display = 'none';
 
-global.init = () => {
-    document.querySelectorAll(".toggle-password").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const input = document.getElementById(this.dataset.target);
-            const icon = this.querySelector("i");
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-            }
-        }, {
-            signal: global.element.controller_deinit.signal
-        });
+document.querySelectorAll(".toggle-password").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const input = document.getElementById(this.dataset.target);
+        const icon = this.querySelector("i");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }, {
+        signal: global.element.controller_deinit.signal
     });
-}
+});
 
 global.deinit = () => {
     global.element.controller_deinit.abort();
     global.element.controller_deinit = null;
     global.element.input.onchange = null;
     global.remove_sse_handler(sse_handler);
+}
+
+global.refresh_handler = async function() {
+    await fetch_current_profile();
 }
 
 global.add_sse_handler(sse_handler);
@@ -252,5 +254,5 @@ async function change_password() {
 
 (async function() {
     global.init();
-    await fetch_current_profile();
+    
 })()

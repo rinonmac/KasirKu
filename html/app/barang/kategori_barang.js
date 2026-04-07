@@ -203,8 +203,8 @@ global.deinit = function() {
     document.removeEventListener("keydown", document_keydown);
 }
 
-global.refresh_handler = function() {
-    fetch_kategori();
+global.refresh_handler = async function() {
+    await fetch_kategori();
 }
 
 global.add_sse_handler(sse_handler);
@@ -429,7 +429,3 @@ async function edit_kategori_barang(id) {
         }
     }
 }
-
-(async function() {
-    global.refresh_handler();
-})();

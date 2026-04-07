@@ -51,8 +51,11 @@ global.deinit = function() {
     document.removeEventListener("keydown", document_keydown);
 }
 
-global.refresh_handler = function() {
-    fetch_barang_masuk();
+global.element.tanggal_barang_masuk_picker.setDate(Date.now());
+global.element.tanggal_barang_masuk.addEventListener("changeDate", fetch_barang_masuk);
+
+global.refresh_handler = async function() {
+    await fetch_barang_masuk();
 }
 
 global.add_sse_handler(sse_handler);
@@ -308,8 +311,3 @@ async function tambah_barang_masuk() {
         }
     }
 }
-
-(async function() {
-    global.element.tanggal_barang_masuk_picker.setDate(Date.now());
-    global.refresh_handler();
-})()

@@ -241,6 +241,10 @@ global.element.roles_table.on('click.button_delete', '.action_delete', async fun
 global.add_sse_handler(sse_handler);
 document.addEventListener("keydown", document_keydown);
 
+global.refresh_handler = async function() {
+    await fetch_roles();
+}
+
 async function sse_handler(data) {
     if (data.type === 1 && data.code === "REFRESH_RP") await fetch_roles();
 }
@@ -452,7 +456,3 @@ async function edit_role(id) {
         }
     }
 }
-
-(async function() {
-    await fetch_roles();
-})();

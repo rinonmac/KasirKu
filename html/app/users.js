@@ -30,25 +30,23 @@ global.element = {
     temp_date: new Date()
 };
 
-global.init = () => {
-    document.querySelectorAll(".toggle-password").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const input = document.getElementById(this.dataset.target);
-            const icon = this.querySelector("i");
-            if (input.type === "password") {
-                input.type = "text";
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
-            } else {
-                input.type = "password";
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
-            }
-        }, {
-            signal: global.element.controller_deinit.signal
-        });
+document.querySelectorAll(".toggle-password").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const input = document.getElementById(this.dataset.target);
+        const icon = this.querySelector("i");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }, {
+        signal: global.element.controller_deinit.signal
     });
-}
+});
 
 global.deinit = () => {
     global.element.controller_deinit.abort();
@@ -199,6 +197,12 @@ global.element.users_table.on('click.delete_user', '.action_delete', async funct
 });
 
 global.add_sse_handler(sse_handler);
+
+global.refresh_handler = async function() {
+    await fetch_roles();
+    if ((await fetch_users()) === 0) return;
+}
+
 document.addEventListener("keydown", document_keydown);
 
 async function sse_handler(data) {
@@ -492,10 +496,3 @@ async function fetch_roles() {
         }
     }
 }
-
-(async function() {
-    global.init();
-    global.init = null;
-    await fetch_roles();
-    if ((await fetch_users()) === 0) return;
-})();

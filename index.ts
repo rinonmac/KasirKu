@@ -4,6 +4,8 @@ import { main } from "./src/server";
 import { global } from "./src/global";
 import { BunSqliteDialect, get_password_hash_only } from "./src/utils/utils";
 import { mkdir } from "node:fs/promises";
+import { readdirSync, statSync } from "node:fs";
+import path from "node:path";
 
 async function database_create_req(db: Kysely<any>, version: number, current_ms: number) { // database create requirement
     if (version < 1) { // Database Version 1.0
@@ -170,6 +172,49 @@ async function database_create_req(db: Kysely<any>, version: number, current_ms:
         .addColumn("modified_ms", "bigint")
         .execute();
     }
+    if (version < 2) { // Database Version 2.0
+        // retur barang
+        await db.schema
+        .createTable("retur_barang")
+        .ifNotExists()
+        .addColumn("id", "integer", col => global.sql_dialect.id_column(col))
+        .addColumn("tanggal_key", "integer", col => col.notNull())
+        .addColumn("barang_id", "integer", col => col.notNull())
+        .addColumn("deskripsi", "text", col => col.defaultTo(null))
+        .addColumn("jumlah_barang", "integer", col => col.notNull())
+        .addColumn("created_ms", "bigint", col => col.notNull())
+        .addColumn("modified_ms", "bigint")
+        .addForeignKeyConstraint(
+            "fk_retur_barang_barang",
+            ["barang_id"],
+            "barang",
+            ["id"],
+            cb => cb.onDelete("cascade").onUpdate("cascade")
+        )
+        .execute();
+    }
+}
+
+async function load_methods(baseDir = "./src/method_function") {
+  const methods = readdirSync(baseDir);
+
+    for (const method of methods) {
+        const method_path = path.join(baseDir, method);
+        if (!statSync(method_path).isDirectory()) continue;
+
+        global.method_cache[method] = {};
+
+        const files = readdirSync(method_path);
+        for (const file of files) {
+            if (!file.endsWith(".ts")) continue;
+
+            const name = file.replace(".ts", "");
+            const mod = await import(path.resolve(method_path, file));
+            if (!mod.default) continue;
+
+            global.method_cache[method][name.toLowerCase()] = mod.default;
+        }
+    }
 }
 
 async function prepare() {
@@ -274,6 +319,7 @@ async function prepare() {
         }
     }
 
+    await load_methods();
     let version: any = null;
     try {
         version = Number((await global.database.selectFrom("kasirku").select("v").where("k", "=", "version").executeTakeFirst())?.v ?? 0);
@@ -301,7 +347,7 @@ async function prepare() {
         .where("k", "=", "version")
         .execute();
     }
-
+    
     console.log("[LOG] All ready!");
 }
 

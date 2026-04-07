@@ -74,8 +74,12 @@ $('#penjualan_table tbody').on('click', 'td.dt-control', async function () {
 });
 
 global.add_sse_handler(sse_handler);
-global.refresh_handler = function() {
-    fetch_penjualan();
+
+global.element.tanggal_penjualan_picker.setDate(Date.now());
+global.element.tanggal_penjualan.addEventListener("changeDate", fetch_penjualan);
+
+global.refresh_handler = async function() {
+    await fetch_penjualan();
 }
 
 async function sse_handler(e) {
@@ -191,9 +195,3 @@ async function fetch_penjualan() {
 
     global.element.penjualan_table.draw();
 }
-
-(async function() {
-    global.element.tanggal_penjualan_picker.setDate(Date.now());
-    global.element.tanggal_penjualan.addEventListener("changeDate", fetch_penjualan);
-    global.refresh_handler();
-})();

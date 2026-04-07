@@ -61,8 +61,10 @@ global.deinit = () => {
     document.removeEventListener("keydown", document_keydown);
 }
 
-global.refresh_handler = () => {
-    fetch_pengeluaran();
+global.element.tanggal_pengeluaran_picker.setDate(Date.now());
+global.element.tanggal_pengeluaran.addEventListener("changeDate", fetch_pengeluaran);
+global.refresh_handler = async function() {
+    await fetch_pengeluaran();
 }
 
 global.add_sse_handler(sse_handler);
@@ -395,9 +397,3 @@ async function edit_pengeluaran(id) {
         }
     }
 }
-
-(async function() {
-    global.element.tanggal_pengeluaran_picker.setDate(Date.now());
-    global.element.tanggal_pengeluaran.addEventListener("changeDate", fetch_pengeluaran);
-    global.refresh_handler();
-})()

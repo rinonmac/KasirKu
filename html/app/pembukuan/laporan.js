@@ -55,8 +55,12 @@ global.deinit = () => {
     global.remove_sse_handler(sse_handler);
 }
 
-global.refresh_handler = function() {
-    fetch_laporan();
+global.element.tanggal_laporan_start_picker.setDate(Date.now());
+global.element.tanggal_laporan_end_picker.setDate(Date.now());
+global.element.tanggal_laporan_start.addEventListener("changeDate", tanggal_laporan_start_event);
+global.element.tanggal_laporan_end.addEventListener("changeDate", tanggal_laporan_end_event);
+global.refresh_handler = async function() {
+    await fetch_laporan();
 }
 
 global.add_sse_handler(sse_handler);
@@ -181,15 +185,3 @@ async function fetch_laporan() {
     global.element.pengeluaran_table.draw();
     global.element.penjualan_table.draw();
 }
-
-async function hitung_total() {
-
-}
-
-(async function() {
-    global.element.tanggal_laporan_start_picker.setDate(Date.now());
-    global.element.tanggal_laporan_end_picker.setDate(Date.now());
-    global.element.tanggal_laporan_start.addEventListener("changeDate", tanggal_laporan_start_event);
-    global.element.tanggal_laporan_end.addEventListener("changeDate", tanggal_laporan_end_event);
-    global.refresh_handler();
-})();

@@ -61,7 +61,12 @@ global.deinit = () => {
     global.remove_sse_handler(sse_handler);
 }
 
-global.refresh_handler = function() {
+global.element.t_barang_total_terjual_start_picker.setDate(Date.now());
+global.element.t_barang_total_terjual_end_picker.setDate(Date.now());
+global.element.t_barang_total_terjual_start.addEventListener("changeDate", tanggal_total_terjual_start_event);
+global.element.t_barang_total_terjual_end.addEventListener("changeDate", tanggal_total_terjual_end_event);
+
+global.refresh_handler = async function() {
     fetch_barang_terjual_tanggal();
     fetch_info_total_hari_ini();
     fetch_barang_kosong();
@@ -199,12 +204,3 @@ async function fetch_barang_terjual_tanggal() {
     }
     global.element.barang_total_terjual_table.draw();
 }
-
-(async function() {
-    global.element.t_barang_total_terjual_start_picker.setDate(Date.now());
-    global.element.t_barang_total_terjual_end_picker.setDate(Date.now());
-    global.element.t_barang_total_terjual_start.addEventListener("changeDate", tanggal_total_terjual_start_event);
-    global.element.t_barang_total_terjual_end.addEventListener("changeDate", tanggal_total_terjual_end_event);
-    
-    global.refresh_handler();
-}());

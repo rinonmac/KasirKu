@@ -36,6 +36,12 @@ const sidebar_data = `<ul class="nav nav-pills nav-sidebar flex-column" data-wid
           <p>Barang Masuk</p>
         </a>
       </li>
+      <li class="nav-item">
+        <a href="/barang/retur_barang" class="nav-link nav-redirect" data-url="/barang/retur_barang">
+          <i class="nav-icon fas fa-dolly" style="transform: scaleX(-1);"></i>
+          <p>Retur Barang</p>
+        </a>
+      </li>
     </ul>
   </li>
   <li class="section_check" style="display: none;" data-value="2">
@@ -179,7 +185,7 @@ global.connect_sse = () => {
           status_server.classList.remove("badge-danger");
           status_server.innerText = "Status: Online";
 
-          if (global.refresh_handler) global.refresh_handler();
+          if (global.refresh_handler) await global.refresh_handler();
           break;
         }
         case "CHANGE_PROFILE": {
@@ -413,6 +419,8 @@ async function load_page(url, push = false) {
     for (const el of pageScripts) {
         await loadPageScriptFromElement(el);
     }
+
+    if (global.refresh_handler) await global.refresh_handler();
 
     requestAnimationFrame(() => {
         newContentEl.classList.remove("page-hidden");

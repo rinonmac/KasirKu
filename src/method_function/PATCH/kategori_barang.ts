@@ -1,0 +1,46 @@
+import { global } from "../../global";
+
+export default async function(req: Request, token: string) {
+    const user_info = global.user_sessions.get(token);
+    if (!token || !user_info) return new Response("Unauthorized", {status: 401});
+
+    const db = global.database;
+    if (!db) return new Response("Internal Server Error", {status: 500});
+    const res_role = await db.selectFrom('roles').select('permission_level').where('id', '=', user_info.role_id).executeTakeFirst();
+    if (!res_role) return new Response("Internal Server Error", {status: 500});
+
+    if (!(res_role.permission_level & (global.permissions.ADMINISTRATOR | global.permissions.MANAGE_BARANG))) return new Response("0", {status: 403});
+
+    const user_input = new URLSearchParams(await req.text());
+
+    const id = Number(user_input.get("id"));
+    const nama_kategori = <string>user_input.get("nama_kategori");
+
+    if (isNaN(id) || !id || !nama_kategori) return new Response("Bad Request", {status: 400});
+
+    try {
+        await db
+        .updateTable('kategori_barang')
+        .set({
+            nama_kategori,
+            modified_ms: Date.now()
+        })
+        .where('id', '=', id)
+        .execute();
+    } catch(e: any) {
+        if (e.code === "SQLITE_CONSTRAINT_UNIQUE") return new Response("1", {status: 403});
+        console.log("An error occured in patch_method.ts at /kategori_barang:", e)
+        return new Response("Internal Server Error", {status: 500});
+    }
+
+    global.sse_clients.broadcast(JSON.stringify({
+        type: 3,
+        code: "UPDATE_KATEGORI",
+        data: {
+            id,
+            nama_kategori
+        }
+    }));
+
+    return new Response("", {status: 200});
+}
