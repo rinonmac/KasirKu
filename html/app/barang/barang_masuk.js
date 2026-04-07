@@ -61,6 +61,51 @@ global.refresh_handler = async function() {
     await fetch_barang_masuk();
 }
 
+global.element.tanggal_barang_masuk.on('click.action_delete', '.action_delete', async function () {
+    Swal.fire({
+        title: "Hapus Barang Masuk",
+        text: "Apakah anda yakin untuk menghapus barang masuk ini?",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes (Enter)",
+        cancelButtonText: "No (Esc)"
+    }).then(async ress => {
+        if (ress.isConfirmed) {
+            let res = await fetch("/barang_masuk", {
+                method: "DELETE",
+                headers: {
+                    token: localStorage.getItem("token")
+                },
+                body: new URLSearchParams({
+                    id: this.value
+                })
+            })
+
+            if (res.status === 200) {
+                swal2_mixin.fire({
+                    icon: "success",
+                    title: "Barang Masuk berhasil dihapus!"
+                });
+            }
+            else {
+                const status = await res.text();
+
+                switch(status) {
+                    default: {
+                        swal2_mixin.fire({
+                            icon: "error",
+                            title: "Terjadi Kesalahan! Silahkan coba lagi nanti."
+                        })
+                        break;
+                    }
+                }
+            }
+        }
+    })
+});
+
 global.add_sse_handler(sse_handler);
 document.addEventListener("keydown", document_keydown);
 
@@ -210,7 +255,7 @@ async function fetch_barang_masuk() {
                     <button type="button" class="text-right btn btn-danger action_delete" value="${data.id}"><i class="fa fa-trash"></i> Hapus</button>
                 </center>`,
                 id: data.id
-        });
+            });
         }
     }
     else {

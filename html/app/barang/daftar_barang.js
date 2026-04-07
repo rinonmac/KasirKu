@@ -98,7 +98,6 @@ global.element.harga_jual.addEventListener("input", harga_jual_event);
 global.element.persen_jual.addEventListener("input", persen_jual_event);
 document.addEventListener("keydown", document_keydown);
 
-
 global.element.kategori_barang.on('select2:select', async function (e) {
   const data = e.params.data
 

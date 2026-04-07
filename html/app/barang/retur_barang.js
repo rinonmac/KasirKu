@@ -133,7 +133,8 @@ global.element.retur_barang_table.on('click.action_delete', '.action_delete', as
                     token: localStorage.getItem("token")
                 },
                 body: new URLSearchParams({
-                    id: this.value
+                    id: this.value,
+                    tanggal_key: global.element.tanggal_retur_barang.value.replaceAll("/", "")
                 })
             })
 
@@ -180,6 +181,7 @@ async function sse_handler(e) {
     else if (e.type === 7) {
         switch(e.code) {
             case "TAMBAH_RETUR_BARANG": {
+                if (String(e.data.tanggal_key) !== global.element.tanggal_retur_barang.value.replaceAll("/", "")) return;
                 global.element.retur_barang_table.row.add({
                     nama_barang: e.data.nama_barang,
                     deskripsi: e.data.deskripsi,
@@ -190,7 +192,6 @@ async function sse_handler(e) {
                     </center>`,
                     id: e.data.id,
                 }).draw();
-                console.log(e.data);
                 break;
             }
             case "UPDATE_RETUR_BARANG": {
@@ -212,7 +213,7 @@ async function sse_handler(e) {
                 break;
             }
             case "DELETE_RETUR_BARANG": {
-                if (String(data.tanggal_key) !== global.element.tanggal_retur_barang.value.replaceAll("/", "")) return;
+                if (String(e.data.tanggal_key) !== global.element.tanggal_retur_barang.value.replaceAll("/", "")) return;
                 global.element.retur_barang_table.row("#" + e.data.id).remove().draw();
                 break;
             }
