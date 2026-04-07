@@ -61,7 +61,14 @@ global.refresh_handler = async function() {
     await fetch_barang_masuk();
 }
 
-global.element.tanggal_barang_masuk.on('click.action_delete', '.action_delete', async function () {
+global.element.modal_barang_masuk.on("shown.bs.modal", function() {
+    if (global.element.modal_barang_masuk_title.innerText === "Tambah Masuk Barang") global.element.nama_barcode_barang.focus();
+    else {
+        global.element.deskripsi.focus();
+    }
+})
+
+global.element.modal_barang_masuk.on('click.action_delete', '.action_delete', async function () {
     Swal.fire({
         title: "Hapus Barang Masuk",
         text: "Apakah anda yakin untuk menghapus barang masuk ini?",
@@ -131,7 +138,7 @@ async function sse_handler(e) {
             case "TAMBAH_BARANG_MASUK": {
                 if (String(e.data.tanggal_key) === global.element.tanggal_barang_masuk.value.replaceAll("/", "")) {
                     global.element.barang_masuk_table.row.add({
-                        mama_barang: e.data.nama_barang,
+                        nama_barang: e.data.nama_barang,
                         deskripsi: e.data.deskripsi,
                         jumlah_barang: format_thousand_separator.format(e.data.jumlah_barang),
                         action: `<center>
