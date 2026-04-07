@@ -36,6 +36,7 @@ export default async function(req: Request, token: string) {
 
     if (
         isNaN(id) || !id
+        || isNaN(tanggal_key) || !tanggal_key
         || !deskripsi
         || isNaN(jumlah_barang) || !jumlah_barang
     ) return new Response("Bad Request", {status: 400});
