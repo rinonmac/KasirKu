@@ -1,3 +1,18 @@
+/*
+──────────────────────────────────────────────────────────────
+                           KasirKu
+        Simple & Efficient Point of Sale (PoS) System
+
+            Author      : Kevin Adhaikal
+            Copyright   : (C) 2026 Kevin Adhaikal
+            License     : AplikasiKasir License
+
+    Permission is granted to modify and distribute this
+    software, but the author's name must not be removed
+                     or altered.
+──────────────────────────────────────────────────────────────
+*/
+
 import { user_session } from "./user_session/user_session";
 import { mutex } from "./utils/utils";
 import { sse_server } from "./sse_server/sse_server";
